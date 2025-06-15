@@ -1,2 +1,3 @@
 # QOS
-An Ultimate Fake-OS Powered by Python3.
+A Professional Fake-OS Powered by Python3.
+Coming Soon...
