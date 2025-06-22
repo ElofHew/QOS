@@ -1,11 +1,11 @@
 {
     "user1": {
         "username": "root",
-        "password": "123456"
+        "password": "MTIzNDU2"
     },
     "user2": {
         "username": "admin",
-        "password": "123456"
+        "password": "MTIzNDU2"
     },
     "user3": {
         "username": "guest",

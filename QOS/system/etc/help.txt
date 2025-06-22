@@ -1,0 +1,13 @@
+help    - Show this help menu
+version - Show the QOS version
+time    - Show the current time
+adduser - Add a new user
+whoami  - Show the current user
+pwd     - Show the current working directory
+clear   - Clear the screen
+ls      - List the files and directories in the current directory
+cd      - Change the current directory
+exit    - Exit QOS
+removeuser - Remove an existing user
+chgpasswd  - Change the password of a user
+settings   - Show the current settings
