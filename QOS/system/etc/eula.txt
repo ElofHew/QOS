@@ -1,0 +1,16 @@
+Quarter OS End-User EULA
+
+Thanks for choosing QOS! We hope you can enjoy it.
+
+QOS is a Fake Operating System that Powered by Python 3.
+Full name of QOS is "Quarter Operating System" but IT IS NOT RELATED TO "QoS" in Network Technology.
+
+By using QOS, you should accept the following End-User EULA:
+1. QOS may record your actions and some data of your computer.
+2. QOS may have access to modify other files on your computer.
+3. QOS may have access to get your personal information.
+
+Attentions:
+1. QOS is not like Subsystems (such as Windows Subsystem for Linux), real OS and VM.
+2. Some incorrrect actions in QOS may destroy QOS system and files on your computer.
+3. If you want to improve QOS, please allow GNU General Public License (GPL) v3.0.

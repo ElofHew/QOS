@@ -2,6 +2,8 @@
 
 # QOS
 
+![QOS Logo](img/logo_b.png)
+
 A Professional **Fake-OS** Powered by Python 3
 
 </div>

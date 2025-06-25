@@ -3,9 +3,9 @@
 import json
 import colorama
 
-import core.options as options
-import core.login as login
-import core.shell as shell
+import system.core.options as options
+import system.core.login as login
+import system.core.shell as shell
 
 colorama.init(autoreset=True)
 
@@ -73,7 +73,7 @@ def general_settings():
 
 def main():
     while True:
-        with open("config/config.json", "r") as qos_config_file:
+        with open("data/config/config.json", "r") as qos_config_file:
             config = json.load(qos_config_file)
         print(colorama.Style.BRIGHT + colorama.Fore.BLUE + "$ QOS Settings $")
         print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "1 - Account Settings")

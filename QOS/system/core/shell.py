@@ -3,7 +3,7 @@
 import colorama
 import json
 
-with open('config/shell.json', 'r') as config_file:
+with open('data/config/shell.json', 'r') as config_file:
     config = json.load(config_file)
     ucp = config['unknown_command_progression']
     theme = config['theme']
@@ -26,5 +26,5 @@ def unknown_command_progression():
         else:
             print(colorama.Fore.RED + "Invalid input. Please enter 'y' or 'n'." + colorama.Style.RESET_ALL)
             continue
-    with open('config/shell.json', 'w') as config_file:
+    with open('data/config/shell.json', 'w') as config_file:
         json.dump(config, config_file, indent=4)

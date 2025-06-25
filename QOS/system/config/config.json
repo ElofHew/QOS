@@ -1,7 +1,10 @@
 {
     "os_type": "windows",
-    "version": "Alpha 0.1",
+    "version": "Alpha 0.2",
     "qos_path": null,
-    "startup_title": "QOS Alpha 0.1",
-    "qos_logo_path": "etc/logo/1.txt"
+    "startup_title": "QOS Alpha 0.2",
+    "qos_logo_path": "system/etc/logo/1.txt",
+    "oobe": true,
+    "data_path": null,
+    "home_path": null
 }

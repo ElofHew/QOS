@@ -1,28 +1,116 @@
 # QOS Login Module
-
-import json
-import sys
-import base64
-import pathlib
-import getpass
-import colorama
-
-import core.qoscore as qoscore
-import core.options as options
+try:
+    # Standard Library Modules
+    import json
+    import sys
+    import base64
+    import pathlib
+    import getpass
+    # Third-Party Modules
+    import colorama
+    # Core Modules
+    import system.core.options as options
+    import system.core.cmds as cmds
+except ImportError as e:
+    print(f"Error: {e}")
+    sys.exit(1)
 
 colorama.init(autoreset=True)
 
+def confirm_username():
+    while True:
+        try:
+            username = input(colorama.Fore.LIGHTMAGENTA_EX + "UserName" + colorama.Style.RESET_ALL + " : ")
+            if username == "":
+                print(f"{colorama.Style.BRIGHT}{colorama.Fore.RED}Please enter a default user name.{colorama.Style.RESET_ALL}")
+                continue
+            elif len(username) > 10:
+                print(f"{colorama.Style.BRIGHT}{colorama.Fore.RED}User name cannot be longer than 10 characters.{colorama.Style.RESET_ALL}")
+                continue
+            elif any(char.isupper() for char in username):
+                print(f"{colorama.Style.BRIGHT}{colorama.Fore.RED}User name cannot contain uppercase letters.{colorama.Style.RESET_ALL}")
+                continue
+            elif " " in username:
+                print(f"{colorama.Style.BRIGHT}{colorama.Fore.RED}User name cannot contain spaces. You can use '_' instead.{colorama.Style.RESET_ALL}")
+                continue
+            elif any(char in "!@#$%^&*()[]{};:,./<>?\|`~-=+" for char in username):
+                print(f"{colorama.Style.BRIGHT}{colorama.Fore.RED}User name cannot contain special characters. You can only use '_'.{colorama.Style.RESET_ALL}")
+                continue
+            elif username[0].isdigit():
+                print(f"{colorama.Style.BRIGHT}{colorama.Fore.RED}User name cannot start with a number.{colorama.Style.RESET_ALL}")
+                continue
+            else:
+                return username
+        except KeyboardInterrupt:
+            print(f"{colorama.Fore.RED}(KeyboardInterrupt Exit){colorama.Style.RESET_ALL}")
+            return None
+
+def confirm_password():
+    while True:
+        try:
+            password = getpass.getpass(colorama.Fore.LIGHTMAGENTA_EX + "Password" + colorama.Style.RESET_ALL + " : ")
+            if password == "":
+                print(f"{colorama.Style.BRIGHT}{colorama.Fore.LIGHTGREEN_EX}No password? (y/n){colorama.Style.RESET_ALL}")
+                if str(input("> ")).lower() == "y":
+                    password = None
+                    return password
+                else:
+                    continue
+            elif len(password) > 8:
+                print(f"{colorama.Style.BRIGHT}{colorama.Fore.RED}Password cannot be longer than 8 characters.{colorama.Style.RESET_ALL}")
+                continue
+            elif " " in password:
+                print(f"{colorama.Style.BRIGHT}{colorama.Fore.RED}Password cannot contain spaces.{colorama.Style.RESET_ALL}")
+                continue
+            else:
+                return password
+        except KeyboardInterrupt:
+            print(f"{colorama.Fore.RED}(KeyboardInterrupt Exit){colorama.Style.RESET_ALL}")
+            return None
+
+def confirm_user_account(username, password):
+    try:
+        # Read existing user data from file
+        user_file_path = pathlib.Path("data/config/users.json")
+        if user_file_path.exists():
+            with open(user_file_path, "r") as qos_user_file:
+                config = json.load(qos_user_file)
+        else:
+            config = {}
+        # Write new user data to file
+        user_index = 1
+        while f"user{user_index}" in config:
+            user_index += 1
+        new_user_key = f"user{user_index}"
+        en_password = base64.b64encode(password.encode('utf-8')).decode('utf-8')
+        config[new_user_key] = {
+            "username": username,
+            "password": en_password if en_password else None
+        }
+        confirmation = input(f"{colorama.Fore.LIGHTCYAN_EX}Are you sure you want to add user '{username}'? (y/n): {colorama.Style.RESET_ALL}").strip().lower()
+        if confirmation.lower() == 'y':
+            with open(user_file_path, "w") as qos_user_file:
+                json.dump(config, qos_user_file, indent=4)
+            print(f"{colorama.Fore.LIGHTGREEN_EX}User {username} added successfully.{colorama.Style.RESET_ALL}")
+            return True
+        else:
+            print(f"{colorama.Fore.YELLOW}User addition canceled.{colorama.Style.RESET_ALL}")
+            return False
+    except KeyboardInterrupt:
+        print(f"{colorama.Fore.RED}Operation canceled.{colorama.Style.RESET_ALL}")
+        return False
+
 def qos_login():
     try:
-        with open("config/users.json", "r") as qos_user_file:
+        with open("data/config/users.json", "r") as qos_user_file:
             config = json.load(qos_user_file)
     except FileNotFoundError:
         print(colorama.Fore.RED + "File 'users.json' not found, please check the file path." + colorama.Style.RESET_ALL)
-        options.clear()
+        cmds.clear()
         sys.exit(1)
     except json.JSONDecodeError:
         print(colorama.Fore.RED + "File 'users.json' is not a valid JSON file." + colorama.Style.RESET_ALL)
-        options.clear()
+        cmds.clear()
         sys.exit(1)
     while True:
         try:
@@ -63,46 +151,27 @@ def qos_login():
                 return username
         except KeyboardInterrupt:
             print(f"{colorama.Fore.DIM}{colorama.Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{colorama.Style.RESET_ALL}")
-            options.clear()
+            cmds.clear()
             sys.exit(1)
 
 def add_user():
-    user_file_path = pathlib.Path("config/users.json")
-    if user_file_path.exists():
-        with open(user_file_path, "r") as qos_user_file:
-            config = json.load(qos_user_file)
-    else:
-        config = {}
-    new_username = input(colorama.Fore.LIGHTRED_EX + "Enter a new username: " + colorama.Style.RESET_ALL)
-    new_password = input(colorama.Fore.LIGHTRED_EX + "Enter a new password (leave empty for no password): " + colorama.Style.RESET_ALL)
-    if new_password:
-        en_password = base64.b64encode(new_password.encode('utf-8')).decode('utf-8')
-    else:
-        en_password = None
-    user_index = 1
-    while f"user{user_index}" in config:
-        user_index += 1
-    new_user_key = f"user{user_index}"
-    config[new_user_key] = {
-        "username": new_username,
-        "password": en_password if en_password else None
-    }
-    confirmation = input(f"{colorama.Fore.LIGHTMAGENTA_EX}Are you sure you want to add user '{new_username}'? (y/n): {colorama.Style.RESET_ALL}").strip().lower()
-    if confirmation.lower() == 'y':
-        with open(user_file_path, "w") as qos_user_file:
-            json.dump(config, qos_user_file, indent=4)
-        print(f"{colorama.Fore.LIGHTGREEN_EX}User {new_username} added successfully.{colorama.Style.RESET_ALL}")
-    else:
-        print(f"{colorama.Fore.YELLOW}User addition canceled.{colorama.Style.RESET_ALL}")
+    # Set new user name
+    print(colorama.Fore.LIGHTGREEN_EX + "Enter a new username.\n" + colorama.Fore.LIGHTBLUE_EX + "(Enter a user name in 10 characters or less, and use only lowercase letters, numbers, and '_'.)" + colorama.Style.RESET_ALL)
+    new_username = confirm_username()
+    # Set new user password
+    print(colorama.Fore.LIGHTGREEN_EX + "Enter a new password\n" + colorama.Fore.LIGHTBLUE_EX + "(Enter a password in 8 characters or less, and don't use spaces.)" + colorama.Style.RESET_ALL)
+    new_password = confirm_password()
+    # Write new user data to file
+    confirm_user_account(new_username, new_password)
 
 def remove_user():
-    user_file_path = pathlib.Path("config/users.json")
+    user_file_path = pathlib.Path("data/config/users.json")
     if user_file_path.exists():
         with open(user_file_path, "r") as qos_user_file:
             config = json.load(qos_user_file)
     else:
         print("File 'users.json' not found, please check the file path.")
-        options.clear()
+        cmds.clear()
         return
     username_to_remove = input(f"{colorama.Fore.LIGHTRED_EX}Enter the username to remove: {colorama.Style.RESET_ALL}")
     user_key_to_remove = None
@@ -123,13 +192,13 @@ def remove_user():
         print(f"{colorama.Fore.RED}User not found.{colorama.Style.RESET_ALL}")
 
 def change_password():
-    user_file_path = pathlib.Path("config/users.json")
+    user_file_path = pathlib.Path("data/config/users.json")
     if user_file_path.exists():
         with open(user_file_path, "r") as qos_user_file:
             config = json.load(qos_user_file)
     else:
         print(f"{colorama.Fore.RED}File 'users.json' not found, please check the file path.{colorama.Style.RESET_ALL}")
-        options.clear()
+        cmds.clear()
         return
     username_to_change = input(colorama.Fore.LIGHTRED_EX + "Enter the username to change password: " + colorama.Style.RESET_ALL)
     user_key_to_change = None
