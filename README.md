@@ -2,7 +2,7 @@
 
 # QOS
 
-![QOS Logo](img/logo_b.png)
+<img src="img/logo_b.png" width=50% />
 
 A Professional **Fake-OS** Powered by Python 3
 
@@ -10,51 +10,13 @@ A Professional **Fake-OS** Powered by Python 3
 
 ## 介绍
 
-QOS 是一款基于 Python 3 的伪操作系统，由 [ElofHew](https://github.com/ElofHew) 开发。（[Oak Studio](https://t.me/oakstd) 版权所有）
+QOS 是一款基于 Python 3 的伪操作系统，由 [ElofHew](https://github.com/ElofHew) 开发。
 
-## 安装指南
+&copy; 2025 [Oak Studio](https://t.me/oakstd) 版权所有。
 
-### 安装 Python 3
+## 安装 Python3：
 
-#### 推荐使用 Python 3.12 及以上版本。
-
-**对于 Windows 用户**
-
-前往 [Python 官网](https://www.python.org/downloads/) 或 [阿里云镜像源](https://mirrors.aliyun.com/python-release/) 下载安装包。
-
-下载完成后直接安装即可。
-
-> 注意：安装界面中，请勾选 `Add Python 3.x to PATH` 选项。
-
-**对于 macOS 用户**
-
-使用 Homebrew 安装 Python：
-
-``` bash
-brew install python3
-```
-
-**对于 Linux 用户**
-
-请根据您的发行版的包管理器安装 Python。
-
-Debian/Ubuntu：
-
-``` bash
-sudo apt-get install python3
-```
-
-CentOS/Fedora：
-
-``` bash
-sudo dnf install python3
-```
-
-Arch Linux：
-
-``` bash
-sudo pacman -S python3
-```
+请详阅 [Python3 安装帮助](docs/Install_Python3.md)
 
 ## 安装依赖
 
@@ -102,9 +64,11 @@ admin：123456
 
 guest：无
 
-<hr>
+------
 
 <div align="center">
+
+Writen by [ElofHew](https://github.com/ElofHew).
 
 &copy; 2025 [Oak Studio](https://t.me/oakstd). All rights reserved.
 

@@ -1,20 +1,21 @@
 # QOS Kom Shell Settings
 
 import json
-import colorama
+from colorama import init as cinit
+from colorama import Fore, Style, Back
 
 import system.core.options as options
 import system.core.login as login
 import system.core.shell as shell
 
-colorama.init(autoreset=True)
+cinit(autoreset=True)
 
 def account_settings():
-    print(colorama.Style.BRIGHT + colorama.Fore.GREEN + "# Account Settings #")
-    print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "1 - Add User")
-    print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "2 - Remove User")
-    print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "3 - Change Password")
-    print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "4 - Back" + colorama.Style.RESET_ALL)
+    print(Style.BRIGHT + Fore.GREEN + "# Account Settings #")
+    print(Style.BRIGHT + Fore.CYAN + "1 - Add User")
+    print(Style.BRIGHT + Fore.CYAN + "2 - Remove User")
+    print(Style.BRIGHT + Fore.CYAN + "3 - Change Password")
+    print(Style.BRIGHT + Fore.CYAN + "4 - Back" + Style.RESET_ALL)
     while True:
         settings2_choice = input("> ")
         if settings2_choice == "1":
@@ -33,10 +34,10 @@ def account_settings():
             continue
 
 def shell_settings():
-    print(colorama.Style.BRIGHT + colorama.Fore.GREEN + "# Shell Settings #")
-    print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "1 - Change Shell Theme")
-    print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "2 - Unknown Command Progression")
-    print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "3 - Back" + colorama.Style.RESET_ALL)
+    print(Style.BRIGHT + Fore.GREEN + "# Shell Settings #")
+    print(Style.BRIGHT + Fore.CYAN + "1 - Change Shell Theme")
+    print(Style.BRIGHT + Fore.CYAN + "2 - Unknown Command Progression")
+    print(Style.BRIGHT + Fore.CYAN + "3 - Back" + Style.RESET_ALL)
     while True:
         settings2_choice = input("> ")
         if settings2_choice == "1":
@@ -53,10 +54,10 @@ def shell_settings():
             continue
 
 def general_settings():
-    print(colorama.Style.BRIGHT + colorama.Fore.GREEN + "# General Settings #")
-    print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "1 - Change Startup Title")
-    print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "2 - Change QOS Logo Text")
-    print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "3 - Back" + colorama.Style.RESET_ALL)
+    print(Style.BRIGHT + Fore.GREEN + "# General Settings #")
+    print(Style.BRIGHT + Fore.CYAN + "1 - Change Startup Title")
+    print(Style.BRIGHT + Fore.CYAN + "2 - Change QOS Logo Text")
+    print(Style.BRIGHT + Fore.CYAN + "3 - Back" + Style.RESET_ALL)
     while True:
         settings2_choice = input("> ")
         if settings2_choice == "1":
@@ -75,11 +76,11 @@ def main():
     while True:
         with open("data/config/config.json", "r") as qos_config_file:
             config = json.load(qos_config_file)
-        print(colorama.Style.BRIGHT + colorama.Fore.BLUE + "$ QOS Settings $")
-        print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "1 - Account Settings")
-        print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "2 - Shell Settings")
-        print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "3 - General Settings")
-        print(colorama.Style.BRIGHT + colorama.Fore.CYAN + "4 - Exit" + colorama.Style.RESET_ALL)
+        print(Style.BRIGHT + Fore.BLUE + "$ QOS Settings $")
+        print(Style.BRIGHT + Fore.CYAN + "1 - Account Settings")
+        print(Style.BRIGHT + Fore.CYAN + "2 - Shell Settings")
+        print(Style.BRIGHT + Fore.CYAN + "3 - General Settings")
+        print(Style.BRIGHT + Fore.CYAN + "4 - Exit" + Style.RESET_ALL)
         settings1_choice = input("> ")
         if settings1_choice == "1":
             account_settings()

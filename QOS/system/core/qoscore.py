@@ -1,12 +1,47 @@
 # QOS Boot System Core
 
 import os
+import sys
 import json
 import platform
+import pathlib
 
 import system.core.cmds as cmds
 
-def check_config():
+def check_home_dir():
+    user_file_path = pathlib.Path("data/config/users.json")
+    if not user_file_path.exists():
+        print("users.json not found")
+        return False
+    # Read User Data from users.json
+    with open(user_file_path, "r") as qos_user_file:
+        config = json.load(qos_user_file)
+    # Initialize Conditon of home_created
+    home_created = False
+    # Check Home Directory, if not exist, create it
+    if not os.path.exists("home/"):
+        os.mkdir("home/")
+        home_created = True
+    # Read User Data from users.json
+    user_index = 1 # Initialize User Index
+    while f"user{user_index}" in config:
+        user_data = config[f"user{user_index}"]
+        # Check Username in User Data
+        if "username" in user_data:
+            username = user_data["username"]
+            user_home_path = f"home/{username}"
+            # Check Home Directory for User, if not exist, create it
+            if not os.path.exists(user_home_path):
+                os.mkdir(user_home_path)
+            else:
+                pass
+        else:
+            pass
+        user_index += 1
+    return home_created
+
+
+def check_config_dir():
     try:
         conf_created = False
         if not os.path.exists("data/config/config.json"):
@@ -22,7 +57,6 @@ def check_config():
     except Exception as e:
         print(f"An error occurred: {e}")
         return False
-    
 
 def check_more_dir():
     try:

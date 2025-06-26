@@ -6,5 +6,6 @@
     "qos_logo_path": "system/etc/logo/1.txt",
     "oobe": true,
     "data_path": null,
-    "home_path": null
+    "home_path": null,
+    "temp_path": null
 }
