@@ -2,7 +2,7 @@
 
 # QOS
 
-<img src="img/logo_b.png" width=50% />
+![QuarterOS Logo](img/logo_b.png)
 
 A Professional **Fake-OS** Powered by Python 3
 
