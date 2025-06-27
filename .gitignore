@@ -1,4 +1,15 @@
-# QOS Activate Dir
+# PyCharm IDE Files
+.idea/
+
+# QOS Python Virtual Environment
+qosvenv/
+
+# QOS DevTools Dir
+devtool/app_files/
+devtool/output/
+devtool/temp/
+
+# QOS Data Dir
 QOS/data/
 QOS/home/
 

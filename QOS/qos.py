@@ -10,18 +10,18 @@
 
 # Check qos.py in path
 try:
-    import os,sys
+    import os, sys, colorama
     now_path = os.getcwd()
     if not os.path.isfile(os.path.join(now_path, 'qos.py')):
         if now_path.endswith('QOS'):
-            raise FileNotFoundError("No such file: 'qos.py' in this directory.\n(Maybe you should 'cd QOS' at this directory first?)")
+            raise FileNotFoundError(f"{colorama.Fore.RED}No such file: 'qos.py' in this directory.\n{colorama.Fore.CYAN}(Maybe you should 'cd QOS' at this directory first?){colorama.Fore.RESET}")
         else:
-            raise FileNotFoundError("No such file: 'qos.py' in this directory.")
+            raise FileNotFoundError(f"{colorama.Fore.RED}No such file: 'qos.py' in this directory.{colorama.Fore.RESET}")
     if not os.path.isdir(os.path.join(now_path, 'system')):
         if now_path.endswith('QOS'):
-            raise NotADirectoryError("No such directory:'system' in this directory.\n(Maybe you should 'cd QOS' at this directory first?)")
+            raise NotADirectoryError(f"{colorama.Fore.RED}No such directory:'system' in this directory.\n{colorama.Fore.CYAN}(Maybe you should 'cd QOS' at this directory first?){colorama.Fore.RESET}")
         else:
-            raise NotADirectoryError("No such directory:'system' in this directory.")
+            raise NotADirectoryError(f"{colorama.Fore.RED}No such directory:'system' in this directory.{colorama.Fore.RESET}")
 except FileNotFoundError as e:
     print(e)
     sys.exit(0)
@@ -39,18 +39,36 @@ except Exception as e:
 # 如果不是则不允许你启动，直接sys.exit(0)退出
 # 另外如果当前目录最后是"QOS"时，提示你再次cd QOS
 
+# Check Python Virtual Environment （检测Python虚拟环境）
+try:
+    import sys, colorama
+    if hasattr(sys, "real_prefix") or (hasattr(sys, "base_prefix") and sys.prefix != sys.base_prefix):
+        del sys, colorama
+    else:
+        print(f"{colorama.Fore.RED}Error: Please run QOS in a Python Virtual Environment.{colorama.Fore.RESET}")
+        print(f"{colorama.Fore.CYAN}If you don't know how to create or activate a Python Virtual Environment, please read the official documentation in 'docs' folder.{colorama.Fore.RESET}")
+        sys.exit(0)
+except ImportError as e:
+    print(f"Error: {e}")
+    sys.exit(0)
+except Exception as e:
+    print(f"Error: {e}")
+    sys.exit(0)
+# (20250627)解释一下：
+# 这里检测你是否在Python虚拟环境中，如果不是则不允许你启动，直接sys.exit(0)退出
+# 这里的检测方法是通过判断sys.real_prefix是否存在来实现的，如果存在则说明你在虚拟环境中，否则反之。
+
 # Initialize QOS Core Modules （导入核心工作模块）
 try:
     import system.core.qoscore as qoscore
 except ImportError as e:
     print(f"Error: {e}")
-    print("Start QOS Core Services Failed.")
+    print("(Start QOS Core Services Failed.)")
     sys.exit(0)
 
 # Check Config Files in data （先检查数据目录是否完好，再检查数据目录的配置文件）
 qoscore.check_more_dir()
 qoscore.check_config_dir()
-qoscore.check_home_dir()
 
 # Check OS （检查你用的操作系统是啥）
 qoscore.check_os()
@@ -73,6 +91,7 @@ try:
     import platform
     import subprocess
     # Import Trird-Party Modules （三方库）
+    import requests
     from colorama import init as cinit
     from colorama import Fore, Style, Back
     # Import QOS Cores （本地库）
@@ -112,6 +131,7 @@ with open("data/config/config.json", "r") as qos_config_file:
 
 # Boot Kom Shell （启动Kom Shell）
 def boot_shell(username):
+    qoscore.check_home_dir()
     cmds.clear()
     komshell.shell(username)
 
@@ -136,22 +156,29 @@ def second_boot():
 # main function （主函数）
 def main():
     qos_logo = pathlib.Path(qos_logo_path)
+    qos_startup = pathlib.Path("system/etc/startup.txt")
     qos_version = str(version)
     print(f"{Style.DIM}Quarter Operation System{Style.RESET_ALL}\n")
     print(f"{Fore.MAGENTA}{Style.BRIGHT}Version: {qos_version}{Style.RESET_ALL}\n")
     options.cat(qos_logo)
-    print("GitHub Repo: https://github.com/ElofHew/QOS")
-    print("Oak Studio: https://t.me/oakstd")
+    options.cat(qos_startup)
     print("")
     time.sleep(1)
 
 # Start QOS （启动QOS）
 if __name__ == "__main__":
-    main()
-    if oobe_condition:
-        import system.opts.oobe as oobe
-        oobe.OOBE().main()
-        del oobe
-    else:
-        pass
-    second_boot()
+    try:
+        main()
+        if oobe_condition:
+            import system.opts.oobe as oobe
+            oobe.OOBE().main()
+            del oobe
+        else:
+            pass
+        second_boot()
+    except KeyboardInterrupt:
+        print(f"{Fore.YELLOW}(KeyboardInterrupt){Style.RESET_ALL}")
+        sys.exit(0)
+    except Exception as e:
+        print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+        sys.exit(0)

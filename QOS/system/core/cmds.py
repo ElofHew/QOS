@@ -12,20 +12,22 @@ cinit(autoreset=True)
 pfs = platform.system().lower()
 
 def ls(work_path):
-    if pfs == "windows":
+    try:
         if not os.path.exists(work_path):
             print(f"{Fore.RED}Error: Path '{work_path}' does not exist.{Style.RESET_ALL}")
             return
+        elif os.listdir(work_path) == []:
+            print(f"{Fore.YELLOW}(This is an empty directory.){Style.RESET_ALL}")
         else:
-            subprocess.call(f"dir {work_path}", shell=True)
-    elif pfs in ("linux", "darwin"):
-        if not os.path.exists(work_path):
-            print(f"{Fore.RED}Error: Path '{work_path}' does not exist.{Style.RESET_ALL}")
-            return
-        else:
-            subprocess.call(f"ls {work_path}", shell=True)
-    else:
-        print(f"{Fore.RED}Error: Unsupported OS.{Style.RESET_ALL}")
+            for file in os.listdir(work_path):
+                if os.path.isfile(os.path.join(work_path, file)):
+                    print(f"{Fore.GREEN}{file}{Style.RESET_ALL}")
+                elif os.path.isdir(os.path.join(work_path, file)):
+                    print(f"{Fore.BLUE}{file}{Style.RESET_ALL}")
+                else:
+                    print(f"{Fore.WHITE}{file}{Style.RESET_ALL}")
+    except OSError as e:
+        print(f"{Fore.RED}Error: Failed to list directory. {e}{Style.RESET_ALL}")
 
 def mkdir(work_path):
     try:

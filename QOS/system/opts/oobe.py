@@ -29,9 +29,15 @@ class OOBE:
         # Set Default User Account
         print(Fore.LIGHTGREEN_EX + "Who will use QOS? \n" + Fore.LIGHTBLUE_EX + "(Enter a default user name in 10 characters or less, and use only lowercase letters, numbers, and '_'.)" + Style.RESET_ALL)
         default_user = login.confirm_username()
+        if default_user == 10:
+            print(Fore.RED + "Error: Keyboard interrupt detected." + Style.RESET_ALL)
+            sys.exit(1)
         # Set New User Account
         print(Fore.LIGHTGREEN_EX + "Please set a password for your account.\n" + Fore.LIGHTBLUE_EX + "(Enter a password in 8 characters or less, and don't use spaces.)" + Style.RESET_ALL)
         user_password = login.confirm_password()
+        if user_password == 10:
+            print(Fore.RED + "Error: Keyboard interrupt detected." + Style.RESET_ALL)
+            sys.exit(1)
         # Write User Account to users.json
         print(Fore.LIGHTGREEN_EX + "Creating user account...\n" + Style.RESET_ALL)
         create_condition = login.confirm_user_account(default_user, user_password)
@@ -45,9 +51,8 @@ class OOBE:
     def eula(self):
         print(f"{Style.BRIGHT}{Fore.CYAN}Please read the EULA of QOS and accept it to continue.{Style.RESET_ALL}\n")
         options.cat("system/etc/eula.txt")
-        input("")
-        cmds.clear()
-        print(f"{Style.BRIGHT}{Fore.CYAN}Do you accept the EULA? (y/n){Style.RESET_ALL}")
+        input("\n(Press any key to continue.)")
+        print(f"\n{Style.BRIGHT}{Fore.CYAN}Do you accept the EULA? (y/n){Style.RESET_ALL}")
         while True:
             choice = input("> ").lower()
             if choice == "y":

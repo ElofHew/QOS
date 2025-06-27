@@ -51,14 +51,17 @@ def confirm_username():
             else:
                 # Check if username already exists
                 existing_usernames = {user_data["username"] for user_data in config.values()}
-                if username in existing_usernames:
-                    print(f"{Style.BRIGHT}{Fore.RED}User {username} already exists. Please choose another name.{Style.RESET_ALL}")
+                if username in ["admin", "root", "guest", "superuser", "su"]:
+                    print(f"{Style.BRIGHT}{Fore.RED}User name cannot be one of the reserved keywords.{Style.RESET_ALL}")
+                    continue
+                elif username in existing_usernames:
+                    print(f"{Style.BRIGHT}{Fore.RED}User '{username}' already exists. Please choose another name.{Style.RESET_ALL}")
                     continue
                 else:
                     return username
         except KeyboardInterrupt:
             print(f"{Fore.RED}(KeyboardInterrupt Exit){Style.RESET_ALL}")
-            return None
+            return 10
 
 def confirm_password():
     while True:
@@ -81,7 +84,7 @@ def confirm_password():
                 return password
         except KeyboardInterrupt:
             print(f"{Fore.RED}(KeyboardInterrupt Exit){Style.RESET_ALL}")
-            return None
+            return 10
 
 def confirm_user_account(username, password):
     try:
@@ -188,7 +191,17 @@ def remove_user():
         print("File 'users.json' not found, please check the file path.")
         cmds.clear()
         return
-    username_to_remove = input(f"{Fore.LIGHTRED_EX}Enter the username to remove: {Style.RESET_ALL}")
+    while True:
+        try:
+            username_to_remove = input(f"{Fore.LIGHTGREEN_EX}Enter a username to remove: {Style.RESET_ALL}")
+            if username_to_remove == "root" or "admin" or "guest" or "superuser" or "su":
+                print(f"{Fore.RED}User '{username_to_remove}' cannot be removed.{Style.RESET_ALL}")
+                continue
+            else:
+                break
+        except KeyboardInterrupt:
+            print(f"{Fore.RED}(KeyboardInterrupt Exit){Style.RESET_ALL}")
+            return
     user_key_to_remove = None
     for user_key, user_data in config.items():
         if user_data["username"] == username_to_remove:

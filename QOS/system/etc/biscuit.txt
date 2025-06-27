@@ -1,0 +1,6 @@
+install <path> - Install a package
+remove <pkg>   - Remove a package
+list           - List all installed packages
+search <query> - Search a package
+get <pkg>      - Get package from online repository (Comming Soon)
+mirror <url>   - Set a mirror for package repository (Comming Soon)

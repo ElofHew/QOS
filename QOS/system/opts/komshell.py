@@ -98,14 +98,34 @@ def shell(username):
                     login.remove_user()
                 case "chgpasswd":
                     login.change_password()
-                case "biscuit":
-                    print(f"{Fore.YELLOW}Usage: biscuit <install|remove> <package>{Style.RESET_ALL}")
-                case shell_command if shell_command.startswith("biscuit install "):
-                    _, pkg_path = shell_command.split(' ', 1)
-                    biscuit.install(pkg_path)
-                case shell_command if shell_command.startswith("biscuit remove "):
-                    _, app_name = shell_command.split(' ', 1)
-                    biscuit.remove(app_name)
+                case shell_command if shell_command.startswith("biscuit "):
+                    _, command, *args = shell_command.split(' ', 2)
+                    if shell_command[0:6] == "biscuit":
+                        print(f"{Fore.YELLOW}% Biscuit Package Manager %{Style.RESET_ALL}")
+                        cmds.cat("system/etc/biscuit.txt")
+                    elif command == "install":
+                        if args:
+                            pkg_path = args[0]
+                            biscuit.install(pkg_path)
+                        else:
+                            print(f"{Fore.YELLOW}Usage: biscuit install <package>{Style.RESET_ALL}")
+                    elif command == "remove":
+                        if args:
+                            app_name = args[0]
+                            biscuit.remove(app_name)
+                        else:
+                            print(f"{Fore.YELLOW}Usage: biscuit remove <package>{Style.RESET_ALL}")
+                    elif command == "list":
+                        biscuit.list()
+                    elif command == "search":
+                        if args:
+                            query = args[0]
+                            biscuit.search(query)
+                        else:
+                            print(f"{Fore.YELLOW}Usage: biscuit search <query>{Style.RESET_ALL}")
+                    else:
+                        print(f"{Fore.YELLOW}% Biscuit Package Manager %{Style.RESET_ALL}")
+                        cmds.cat("system/etc/biscuit.txt")
                 case "settings":
                     try:
                         import system.apps.settings as settings
@@ -124,7 +144,7 @@ def shell(username):
                         if os.path.isfile(script_path):
                             subprocess.call(["python", script_path])
                         else:
-                            print(f"{Fore.RED}未知命令:{Style.RESET_ALL} {shell_command}")
+                            print(f"{Fore.RED}Unknown command:{Style.RESET_ALL} {shell_command}")
 
         except KeyboardInterrupt:
             print(f"{Style.DIM}{Fore.YELLOW}(KeyboardInterrupt){Style.RESET_ALL}")

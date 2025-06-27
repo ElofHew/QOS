@@ -177,3 +177,23 @@ def remove(app_name):
     except Exception as e:
         print(f"{Fore.RED}An error occurred during removal: {e}{Fore.RESET}")
         return 1
+
+def list():
+    try:
+        with open("data/shell/apps.json") as add_app_f:
+            add_app_config = json.load(add_app_f)
+        if len(add_app_config) == 0:
+            print(f"{Fore.YELLOW}No packages installed.{Fore.RESET}")
+            return 1
+        else:
+            print(f"{Fore.GREEN}Installed packages:{Fore.RESET}")
+            for app_name in add_app_config:
+                app_version = add_app_config[app_name]["version"]
+                print(f"{Fore.CYAN}{app_name} {app_version}{Fore.RESET}")
+            return 0
+    except FileNotFoundError:
+        print(f"{Fore.RED}File 'apps.json' not found.{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
+        return 1
