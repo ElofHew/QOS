@@ -2,11 +2,10 @@
 
 import os
 import sys
+import shutil
 import json
 import platform
 import pathlib
-
-import system.core.cmds as cmds
 
 def check_home_dir():
     user_file_path = pathlib.Path("data/config/users.json")
@@ -44,14 +43,16 @@ def check_home_dir():
 def check_config_dir():
     try:
         conf_created = False
-        if not os.path.exists("data/config/config.json"):
-            cmds.cp("system/config/config.json", "data/config/")
+        data_config_dir = os.path.join(os.getcwd(), "data", "config")
+        system_config_dir = os.path.join(os.getcwd(), "system", "config")
+        if not os.path.exists(os.path.join(data_config_dir, "config.json")):
+            shutil.copyfile(os.path.join(system_config_dir, "config.json"), os.path.join(data_config_dir, "config.json"))
             conf_created = True
-        if not os.path.exists("data/config/users.json"):
-            cmds.cp("system/config/users.json", "data/config/")
+        if not os.path.exists(os.path.join(data_config_dir, "users.json")):
+            shutil.copyfile(os.path.join(system_config_dir, "users.json"), os.path.join(data_config_dir, "users.json"))
             conf_created = True
-        if not os.path.exists("data/config/shell.json"):
-            cmds.cp("system/config/shell.json", "data/config/")
+        if not os.path.exists(os.path.join(data_config_dir, "shell.json")):
+            shutil.copyfile(os.path.join(system_config_dir, "shell.json"), os.path.join(data_config_dir, "shell.json"))
             conf_created = True
         return conf_created
     except Exception as e:
