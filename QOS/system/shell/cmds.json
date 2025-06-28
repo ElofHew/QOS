@@ -10,8 +10,6 @@
         "date": "Show the current date",
         "sysinfo": "Show system information",
         "clear": "Clear the console",
-        "shutdown": "Shutdown the system",
-        "reboot": "Reboot the system",
         "exit": "Exit QOS"
     },
     "NeedArgs": {
