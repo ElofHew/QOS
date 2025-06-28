@@ -43,7 +43,7 @@ except Exception as e:
 try:
     import sys, colorama
     if hasattr(sys, "real_prefix") or (hasattr(sys, "base_prefix") and sys.prefix != sys.base_prefix):
-        del sys, colorama
+        pass
     else:
         print(f"{colorama.Fore.RED}Error: Please run QOS in a Python Virtual Environment.{colorama.Fore.RESET}")
         print(f"{colorama.Fore.CYAN}If you don't know how to create or activate a Python Virtual Environment, please read the official documentation in 'docs' folder.{colorama.Fore.RESET}")
@@ -108,12 +108,6 @@ except ImportError as e:
     print("Import Modules or QOS Core Failed.")
     sys.exit(0)
 
-try:
-    # Delete Unused Modules （删除没用的模块）
-    del os, sys, platform, shutil, subprocess, zipfile, base64, getpass, oobe, settings
-except NameError as e:
-    print(f"{Style.BRIGHT}{Fore.YELLOW}WARNING: Some modules are not found.{Style.RESET_ALL}")
-
 # Initialize Colorama （初始化colorama模块）
 cinit(autoreset=True)
 
@@ -133,7 +127,7 @@ with open("data/config/config.json", "r") as qos_config_file:
 def boot_shell(username):
     qoscore.check_home_dir()
     cmds.clear()
-    komshell.shell(username)
+    komshell.main(username)
 
 # second_boot function （二次启动）
 def second_boot():

@@ -15,7 +15,7 @@ with open("data/config/config.json", "r") as config_file:
     os_type = config_file["os_type"]
 
 def cat(file_path):
-    txt_path = pathlib.Path(str(file_path))
+    txt_path = pathlib.Path(file_path)
     if txt_path.exists():
         try:
             with open(file_path, "r") as f:

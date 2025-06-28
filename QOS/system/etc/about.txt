@@ -1,0 +1,16 @@
+           ___     ___    ____           
+          / _ \   / _ \  / ___|          
+         | | | | | | | | \___ \          
+         | |_| | | |_| |  ___) |         
+          \__\_\  \___/  |____/          
+                                         
+A Professional Fake-OS Powered by Python 3
+  \u00A9 2025 Oak Studio All Rights Reserved.  
+
+GitHub Repo: https://github.com/ElofHew/QOS
+Telegram Channel: https://t.me/oakstdcn
+Telegram Group: https://t.me/oakstd
+QQ Channel: https://pd.qq.com/s/4kqa7818b
+
+Developers:
+ElofHew (Owner) - Quarter OS Main Developer

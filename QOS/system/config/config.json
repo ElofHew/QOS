@@ -7,5 +7,6 @@
     "oobe": true,
     "data_path": null,
     "home_path": null,
-    "temp_path": null
+    "temp_path": null,
+    "last_login": null
 }

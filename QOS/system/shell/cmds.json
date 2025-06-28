@@ -1,0 +1,36 @@
+{
+    "NoArgs": {
+        "pwd": "Show the current working directory",
+        "cwd": "Show the REAL current working directory",
+        "help": "Show the list of available commands",
+        "about": "Show information about QOS",
+        "version": "Show the system version of QOS",
+        "whoami": "Show the current user",
+        "time": "Show the current time",
+        "date": "Show the current date",
+        "sysinfo": "Show system information",
+        "clear": "Clear the console",
+        "shutdown": "Shutdown the system",
+        "reboot": "Reboot the system",
+        "exit": "Exit QOS"
+    },
+    "NeedArgs": {
+        "cat": "Show the content of a file",
+        "echo": "Display a message on the console",
+        "cp": "Copy a file or directory",
+        "mv": "Move a file or directory",
+        "ls": "Show the list of files and directories in a directory",
+        "cd": "Change the current directory",
+        "touch": "Create a new file",
+        "edit": "Edit a file",
+        "mkdir": "Create a new directory",
+        "rename": "Rename a file or directory",
+        "rm": "Remove a file or directory"
+    },
+    "PackageManager" : {
+        "biscuit": "Quarter OS Package Manager",
+        "pkg": "A simple name to use Biscuit",
+        "bkt": "A simple name to use Biscuit",
+        "pm": "A simple name to use Biscuit"
+    }
+}

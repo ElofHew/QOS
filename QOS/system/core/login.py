@@ -1,6 +1,7 @@
 # QOS Login Module
 try:
     # Standard Library Modules
+    import os
     import json
     import sys
     import base64
@@ -145,20 +146,32 @@ def qos_login():
                         break
                     else:
                         de_password = base64.b64decode(password).decode('utf-8')
-                        while True:
-                            try:
-                                print(f"{Fore.LIGHTGREEN_EX}Enter password: {Style.RESET_ALL}")
-                                input_password = getpass.getpass(">>> ")
-                                if input_password == de_password:
-                                    login_success = True
-                                    break
-                                else:
-                                    print(Fore.RED + "Incorrect password, please try again." + Style.RESET_ALL)
-                                    login_success = False
-                                    continue
-                            except KeyboardInterrupt:
-                                print(f"{Style.DIM}{Fore.GREEN}(Change User Account){Style.RESET_ALL}")
-                                break
+            while True:
+                try:
+                    print(f"{Fore.LIGHTGREEN_EX}Enter password: {Style.RESET_ALL}")
+                    input_password = getpass.getpass(">>> ")
+                    if input_password == de_password:
+                        login_success = True
+                        with open(os.path.join(os.getcwd(), "data", "config", "config.json"), "r") as config_file:
+                            config = json.load(config_file)
+                        config["last_login"] = username
+                        with open(os.path.join(os.getcwd(), "data", "config", "config.json"), "w") as config_file:
+                            json.dump(config, config_file, indent=4)
+                        config_file.close()
+                        break
+                    else:
+                        print(Fore.RED + "Incorrect password, please try again." + Style.RESET_ALL)
+                        login_success = False
+                        continue
+                except KeyboardInterrupt:
+                    print(f"{Style.DIM}{Fore.GREEN}(Change User Account){Style.RESET_ALL}")
+                    break
+                except EOFError:
+                    print(f"{Style.DIM}{Fore.GREEN}(Change User Account){Style.RESET_ALL}")
+                    break
+                except Exception as e:
+                    print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+                    login_success = False
                     break
             if not user_found:
                 print(f"{Fore.RED}User not found.{Style.RESET_ALL}")
@@ -169,6 +182,14 @@ def qos_login():
                 return username
         except KeyboardInterrupt:
             print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
+            cmds.clear()
+            sys.exit(1)
+        except EOFError:
+            print(f"{Style.DIM}{Fore.YELLOW}\nEOF detected. Exiting...{Style.RESET_ALL}")
+            cmds.clear()
+            sys.exit(1)
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
             cmds.clear()
             sys.exit(1)
 
