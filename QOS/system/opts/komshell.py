@@ -98,15 +98,19 @@ def shell(username):
                     login.remove_user()
                 case "chgpasswd":
                     login.change_password()
+                case "biscuit":
+                    print(f"{Fore.YELLOW}% Biscuit Package Manager %{Style.RESET_ALL}")
+                    options.cat("system/etc/biscuit.txt")
                 case shell_command if shell_command.startswith("biscuit "):
                     _, command, *args = shell_command.split(' ', 2)
                     if shell_command[0:6] == "biscuit":
                         print(f"{Fore.YELLOW}% Biscuit Package Manager %{Style.RESET_ALL}")
-                        cmds.cat("system/etc/biscuit.txt")
+                        options.cat("system/etc/biscuit.txt")
                     elif command == "install":
                         if args:
                             pkg_path = args[0]
-                            biscuit.install(pkg_path)
+                            return_pkg_path = os.path.join(working_path, pkg_path)
+                            biscuit.install(return_pkg_path)
                         else:
                             print(f"{Fore.YELLOW}Usage: biscuit install <package>{Style.RESET_ALL}")
                     elif command == "remove":
@@ -115,17 +119,17 @@ def shell(username):
                             biscuit.remove(app_name)
                         else:
                             print(f"{Fore.YELLOW}Usage: biscuit remove <package>{Style.RESET_ALL}")
-                    elif command == "list":
-                        biscuit.list()
                     elif command == "search":
                         if args:
                             query = args[0]
                             biscuit.search(query)
                         else:
                             print(f"{Fore.YELLOW}Usage: biscuit search <query>{Style.RESET_ALL}")
+                    elif command == "list":
+                        biscuit.list()
                     else:
                         print(f"{Fore.YELLOW}% Biscuit Package Manager %{Style.RESET_ALL}")
-                        cmds.cat("system/etc/biscuit.txt")
+                        options.cat("system/etc/biscuit.txt")
                 case "settings":
                     try:
                         import system.apps.settings as settings

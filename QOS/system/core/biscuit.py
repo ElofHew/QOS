@@ -1,7 +1,7 @@
 """
 @ Biscuit Software Manager for QOS
 @ Author: ElofHew
-@ Version: 0.1
+@ Version: 1.0
 @ Date: 2025.06.24
 """
 
@@ -21,120 +21,151 @@ with open("data/config/config.json", "r") as f:
     qos_path = config["qos_path"]
 
 def install(pkg_path):
-    package_file_name = os.path.basename(pkg_path)
-    # Confirm installation
-    print(f"Do you want to install '{package_file_name}' ? (y/n): ")
-    while True:
-        try:
-            check = str(input("> "))
-            if check.lower() == "y" or check.lower() == "yes":
-                break
-            elif check.lower() == "n" or check.lower() == "no":
-                print(Fore.RED + "Operation cancelled." + Fore.RESET)
-                return 1
-            else:
-                print(Fore.RED + "Invalid input. Please enter 'y' or 'n'." + Style.RESET)
-                continue
-        except KeyboardInterrupt:
-            print(Fore.RED + "Operation cancelled." + Fore.RESET)
-            return 1
-    # Start installation
-    print("Installing package...")
+    ins_pkg_path = pkg_path
+    temp_path = os.path.join(qos_path,"data", "temp")
+    apps_path = os.path.join(qos_path,"data", "apps")
+    if not os.path.exists(ins_pkg_path):
+        print(f"{Fore.RED}Package not found.{Fore.RESET}")
+        return 1
+    if not os.path.exists(temp_path):
+        os.makedirs(temp_path)
+    if not os.path.exists(apps_path):
+        os.makedirs(apps_path)
+    # Extract package
+    print(f"{Fore.CYAN}Installing package...{Fore.RESET}")
     try:
-        # Check temp directory
-        temp_dir = os.path.join(qos_path, "data", "temp")
-        if not os.path.exists(temp_dir):
-            os.makedirs(temp_dir)
-        else:
-            for filename in os.listdir(temp_dir):
-                file_path = os.path.join(temp_dir, filename)
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
-                elif os.path.isdir(file_path) and filename != 'tmp':
-                    shutil.rmtree(file_path)
-        # Extract package to temp directory
-        destination_path = os.path.join(temp_dir, os.path.basename(pkg_path))
-        shutil.copy(pkg_path, destination_path)
-        try:
-            new_name = os.path.splitext(os.path.basename(pkg_path))[0] + ".zip"
-            os.rename(destination_path, os.path.join(temp_dir, new_name))
-            unzip_dir = os.path.join(qos_path, "data", "apps", new_name[:-4])
-            with zipfile.ZipFile(os.path.join(temp_dir, new_name), 'r') as zip_ref:
-                zip_ref.extractall(unzip_dir)
-            with open(os.path.join(unzip_dir, "info.json"), "r") as demo_f:
-                config = json.load(demo_f)
-            app_name = config["name"]
-            app_version = config["version"]
-            print(f"{Fore.GREEN}App Name:{Fore.RESET} {app_name}")
-            print(f"{Fore.GREEN}App Version:{Fore.RESET} {app_version}")
-            # Confirm continue installation
-            while True:
-                try:
-                    contn = str(input(Fore.CYAN + "Continue to install this package? (y/n): " + Fore.RESET))
-                    if contn.lower() == "y" or contn.lower() == "yes":
-                        break
-                    elif contn.lower() == "n" or contn.lower() == "no":
-                        print(Fore.RED + "Operation cancelled." + Fore.RESET)
-                        return 1
-                    else:
-                        print(Fore.RED + "Invalid input. Please enter 'y' or 'n'." + Style.RESET)
-                        continue
-                except KeyboardInterrupt:
+        with zipfile.ZipFile(ins_pkg_path, "r") as zip_ref:
+            zip_ref.extractall(os.path.join(temp_path, "package"))
+        temp_path = os.path.join(temp_path, "package")
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred during package extraction: {e}{Fore.RESET}")
+        return 1
+    # Get app name and version
+    try:
+        with open(os.path.join(temp_path, "info.json"), "r") as app_json_f:
+            app_json = json.load(app_json_f)
+            app_name = app_json["name"]
+            app_version = app_json["version"]
+            app_author = app_json["author"]
+            app_desc = app_json["description"]
+            app_category = app_json["category"]
+            app_min = app_json["min_python_version"]
+            app_tar = app_json["target_python_version"]
+            app_comptb = app_json["comptb_os"]
+            app_bktver = app_json["biscuit_version"]
+        while True:
+            try:
+                check = str(input(f"{Fore.CYAN}Do you want to install the package '{app_name}'? (y/n): {Fore.RESET}"))
+                if check == "y" or check == "Y":
+                    break
+                elif check == "n" or check == "N":
                     print(Fore.RED + "Operation cancelled." + Fore.RESET)
                     return 1
-            # Check older version of app
-            existing_app_dir = os.path.join(qos_path, "data", "apps", app_name)
-            if os.path.exists(existing_app_dir):
-                with open(os.path.join(existing_app_dir, "info.json"), "r") as old_f:
-                    existing_config = json.load(old_f)
-                existing_app_version = existing_config["version"]
-                if existing_app_version < app_version:
-                    print(f"{Fore.YELLOW}Found older version {existing_app_version} of {app_name}. Installing newer version {app_version}.")
-                    shutil.rmtree(existing_app_dir)
-                elif existing_app_version == app_version:
-                    # Move new app to existing app directory
-                    print(f"{app_name} already installed with version {existing_app_version}. No need to install again.")
-                    shutil.rmtree(os.path.join(temp_dir, new_name[:-4]))
-                    return 0
                 else:
-                    print(f"{Fore.RED}Error: {app_name} has a higher version than the existing version {existing_app_version}. Please uninstall the existing version first.{Fore.RESET}")
-                    return 1
-                old_f.close()
-            os.rename(unzip_dir, os.path.join(qos_path, "data", "apps", app_name))
-            new_path_app = os.path.join(qos_path, "data", "apps", app_name)
-            print(f"{Fore.CYAN}Installing dependencies...{Fore.RESET}")
-            try:
-                if not os.path.exists(os.path.join(new_path_app, "requirements.txt")):
-                    pass
-                else:
-                    os.chdir(new_path_app)
-                    subprocess.run(["pip", "install", "-r", "requirements.txt"], check=True)
-                    print(f"{Fore.GREEN}Dependencies installed.{Fore.RESET}")
-                with open("data/shell/apps.json") as add_app_f:
-                    add_app_config = json.load(add_app_f)
-                add_app_config[app_name] = {"path": new_path_app, "version": app_version}
-                with open("data/shell/apps.json", "w") as add_app_f:
-                    json.dump(add_app_config, add_app_f, indent=4)
-                add_app_f.close()
-                print(f"{Fore.LIGHTGREEN_EX}Package successfully installed to {new_path_app}!{Fore.RESET}")
-                return 0
-            except subprocess.CalledProcessError:
-                print(f"{Fore.RED}File not found.{Fore.RESET}")
-                shutil.rmtree(os.path.join(temp_dir, new_name[:-4]))
+                    print(Fore.RED + "Invalid input. Please enter 'y' or 'n'." + Fore.RESET)
+                    continue
+            except KeyboardInterrupt:
+                print(Fore.RED + "Operation cancelled." + Fore.RESET)
                 return 1
-            except Exception as e:
-                print(f"{Fore.RED}An error occurred during installing dependencies: {e}{Fore.RESET}")
-                shutil.rmtree(os.path.join(temp_dir, new_name[:-4]))
-                return 1
-        except Exception as e:
-            print(f"{Fore.RED}An error occurred during renaming or extraction: {e}{Fore.RESET}")
-            shutil.rmtree(os.path.join(temp_dir, new_name[:-4]))
-            return 1
+    except FileNotFoundError:
+        print(f"{Fore.RED}File 'info.json' not found.{Fore.RESET}")
+        return 1
     except Exception as e:
         print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
-        if 'new_name' in locals():
-            shutil.rmtree(os.path.join(temp_dir, new_name[:-4]))
         return 1
+    finally:
+        app_json_f.close()
+    # Install app
+    try:
+        app_dir = os.path.join(apps_path, app_name)
+        if os.path.exists(app_dir):
+            with open(os.path.join(app_dir, "info.json"), "r") as exist_app_json_f:
+                exist_app_json = json.load(exist_app_json_f)
+            if exist_app_json["version"] == app_version:
+                print(f"{Fore.YELLOW}Package '{app_name}' already installed. Do you want to install it again? (y/n): {Fore.RESET}")
+                while True:
+                    try:
+                        check = str(input("> "))
+                        if check == "y" or check == "Y":
+                            break
+                        elif check == "n" or check == "N":
+                            print(Fore.RED + "Operation cancelled." + Fore.RESET)
+                            return 1
+                        else:
+                            print(Fore.RED + "Invalid input. Please enter 'y' or 'n'." + Fore.RESET)
+                            continue
+                    except KeyboardInterrupt:
+                        print(Fore.RED + "Operation cancelled." + Fore.RESET)
+                        return 1
+                shutil.rmtree(app_dir)
+            elif exist_app_json["version"] > app_version:
+                print(f"{Fore.YELLOW}There is a newer version of package '{app_name}'. You couldn't downgrade it.{Fore.RESET}")
+                input(f"{Fore.CYAN}(Press any key to continue.){Fore.RESET}")
+                return 1
+            elif exist_app_json["version"] < app_version:
+                print(f"{Fore.YELLOW}There is an older version of package '{app_name}'. Biscuit will upgrade it.{Fore.RESET}")
+                print(f"{Fore.CYAN}(Press any key to continue.){Fore.RESET}")
+        shutil.copytree(temp_path, app_dir)
+        # Install dependencies
+        try:
+            with open(os.path.join(app_dir, "info.json"), "r") as req_f:
+                req_json = json.load(req_f)
+                req_list = req_json.get("depends", [])
+                # 处理 req_list 为空或只有空字符串的情况
+                if not req_list or all(not req.strip() for req in req_list):
+                    print(f"{Fore.GREEN}No dependencies needed to install.{Fore.RESET}")
+                else:
+                    print(f"{Fore.CYAN}Installing dependencies...{Fore.RESET}")
+                    try:
+                        for req in req_list:
+                            req = req.strip().replace(" ", "")
+                            if req:  # 确保 req 不是空字符串
+                                subprocess.run([sys.executable, "-m", "pip", "install", req], check=True)
+                        print(f"{Fore.GREEN}Dependencies installed successfully.{Fore.RESET}")
+                    except subprocess.CalledProcessError as e:
+                        print(f"{Fore.RED}An error occurred while installing dependencies: {e}{Fore.RESET}")
+                        return 1
+            req_f.close()
+        except FileNotFoundError:
+            print(f"{Fore.RED}File 'info.json' not found.{Fore.RESET}")
+            return 1
+        except json.JSONDecodeError:
+            print(f"{Fore.RED}File 'info.json' format is incorrect.{Fore.RESET}")
+            return 1
+        # Add app to registry
+        try:
+            if not os.path.exists(os.path.join(qos_path, "data", "shell")):
+                os.makedirs(os.path.join(qos_path, "data", "shell"))
+            apps_json_path = os.path.join(qos_path, "data", "shell", "apps.json")
+            if os.path.exists(apps_json_path):
+                with open(apps_json_path, "r") as add_app_f:
+                    add_app_config = json.load(add_app_f)
+            else:
+                add_app_config = {}
+            add_app_config[app_name] = {
+                "path": app_dir,
+                "version": app_version,
+                "author": app_author,
+                "description": app_desc,
+                "category": app_category,
+                "min_python_version": app_min,
+                "target_python_version": app_tar,
+                "comptb_os": app_comptb,
+                "biscuit_version": app_bktver
+            }
+            with open(apps_json_path, "w") as add_app_f:
+                json.dump(add_app_config, add_app_f, indent=4)
+        except Exception as e:
+            print(f"{Fore.RED}An error occurred during app registry update: {e}{Fore.RESET}")
+            return 1
+        # Clean up
+        print(f"{Fore.GREEN}Package '{app_name}' has been successfully installed.{Fore.RESET}")
+        return 0
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred during installation: {e}{Fore.RESET}")
+        return 1
+    finally:
+        shutil.rmtree(temp_path)
 
 def remove(app_name):
     print(f"{Fore.RED}Removing package: {app_name}{Fore.RESET}")
@@ -172,6 +203,12 @@ def remove(app_name):
     # Remove app directory
     try:
         shutil.rmtree(app_dir)
+        with open("data/shell/apps.json", "r") as add_app_f:
+            add_app_config = json.load(add_app_f)
+        del add_app_config[app_name]
+        with open("data/shell/apps.json", "w") as add_app_f:
+            json.dump(add_app_config, add_app_f, indent=4)
+        add_app_f.close()
         print(f"{Fore.GREEN}Package '{app_name}' has been successfully removed.{Fore.RESET}")
         return 0
     except Exception as e:
@@ -189,7 +226,28 @@ def list():
             print(f"{Fore.GREEN}Installed packages:{Fore.RESET}")
             for app_name in add_app_config:
                 app_version = add_app_config[app_name]["version"]
-                print(f"{Fore.CYAN}{app_name} {app_version}{Fore.RESET}")
+                print(f"{Fore.CYAN}{app_name}{Fore.RESET} - {Fore.GREEN}{app_version}{Fore.RESET}")
+            return 0
+    except FileNotFoundError:
+        print(f"{Fore.RED}File 'apps.json' not found.{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
+        return 1
+    
+def search(keyword):
+    try:
+        with open("data/shell/apps.json") as add_app_f:
+            add_app_config = json.load(add_app_f)
+        if len(add_app_config) == 0:
+            print(f"{Fore.YELLOW}No packages installed.{Fore.RESET}")
+            return 1
+        else:
+            print(f"{Fore.GREEN}Search results for '{keyword}':{Fore.RESET}")
+            for app_name in add_app_config:
+                if keyword.lower() in app_name.lower():
+                    app_version = add_app_config[app_name]["version"]
+                    print(f"{Fore.CYAN}{app_name}{Fore.RESET} - {Fore.GREEN}{app_version}{Fore.RESET}")
             return 0
     except FileNotFoundError:
         print(f"{Fore.RED}File 'apps.json' not found.{Fore.RESET}")

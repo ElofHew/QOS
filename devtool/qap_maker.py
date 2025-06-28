@@ -245,7 +245,7 @@ def create_qap_make_info_json(app_files_dir):
             "target_python_version": app_target,
             "comptb_os": app_compat,
             "biscuit_version": app_bktver,
-            "category": app_tags_list,
+            "tags": app_tags_list,
             "depends": app_depends_list
         }
         # Writing the info.json file
