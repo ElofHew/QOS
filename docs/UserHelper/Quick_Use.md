@@ -24,14 +24,14 @@
 
 ``` powershell
 # Windows
-# 例如虚拟环境名为 Quarter OSvenv
-.\Quarter OSvenv\Scripts\Activate.ps1
+# 例如虚拟环境名为 qosvenv
+.\qosvenv\Scripts\Activate.ps1
 ```
 
 ``` bash
 # Linux/macOS
-# 例如虚拟环境名为 Quarter OSvenv
-source Quarter OSvenv/bin/activate
+# 例如虚拟环境名为 qosvenv
+source qosvenv/bin/activate
 ```
 
 ### ④ 在虚拟环境中安装依赖
