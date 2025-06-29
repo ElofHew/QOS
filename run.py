@@ -9,6 +9,7 @@
 import os
 import sys
 import platform
+import subprocess
 
 try:
     if not os.path.exists(os.path.join(os.getcwd(),"QOS","qos.py")) and os.path.exists(os.path.join(os.getcwd(),"QOS","system")):
@@ -41,17 +42,32 @@ if pfs == 'windows':
         sys.exit(1)
 
 def activate_venv():
-    print("Making virtual environment...")
-    os.system('python -m venv qosvenv')
-    print("Activating requirements...")
+    if not os.path.exists('qosvenv'):
+        print("Making virtual environment...")
+        os.system('python -m venv qosvenv')
+    print("Activating Environment...")
     if pfs == 'windows':
-        os.system('.\\qosvenv\\Scripts\\activate.ps1')
+        try:
+            subprocess.run(['powershell', '-ExecutionPolicy', 'RemoteSigned', '.\\qosvenv\\Scripts\\activate.ps1'], check=True)
+        except subprocess.CalledProcessError:
+            print("Error: Could not activate virtual environment.")
+            sys.exit(1)
     else:
-        os.system('source qosvenv/bin/activate')
+        os.system('source ./qosvenv/bin/activate')
 
 def ins_req():
-    print("Installing requirements...")
-    os.system('pip install -r requirements.txt')
+    print("Checking and installing requirements...")
+    with open('requirements.txt') as f:
+        required = f.read().splitlines()
+    for package in required:
+        # 检查模块是否已经安装
+        try:
+            subprocess.check_call([sys.executable, '-m', 'pip', 'show', package])
+            print(f"{package} is already installed.")
+        except subprocess.CalledProcessError:
+            # 如果模块未安装，则进行安装
+            print(f"Installing {package}...")
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
     print("QOS is ready to use.")
 
 def make_path():

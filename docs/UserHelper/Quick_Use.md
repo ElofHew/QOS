@@ -2,16 +2,11 @@
 
 ## 下载安装
 
-下载QOS发行版：[GitHub Release](https://github.com/ElofHew/QOS/releases)
-
-不同发行版介绍：
-
-- `QOS_compiled.zip`：已编译好的QOS发行版，和源代码环境一样，使用方式也一样
-- `QOS_win_green.zip`：适用于Windows系统，已打包成exe应用程序，无需安装Python环境，直接运行即可
-- `QOS_win_installer.zip`：适用于Windows系统，基于NSIS制作的安装包，双击运行即可安装到系统
-- `QOS_linux_deb.deb`：适用于Debian/Ubuntu系统，基于.deb包安装，可直接安装到系统（敬请期待）
+下载QOS Release：[GitHub Release](https://github.com/ElofHew/QOS/releases)
 
 如果你想参与开发，可以直接下载源代码：[GitHub Repository](https://github.com/ElofHew/QOS)
+
+ （注意，可能遇到bug或不稳定的功能，请不要在生产环境中使用）
 
 终端运行：`git clone https://github.com/ElofHew/QOS.git`
 
