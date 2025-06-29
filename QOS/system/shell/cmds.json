@@ -32,6 +32,7 @@
         "biscuit": "Quarter OS Package Manager",
         "pkg": "A simple name to use Biscuit",
         "bkt": "A simple name to use Biscuit",
+        "bpm": "A simple name to use Biscuit",
         "pm": "A simple name to use Biscuit"
     },
     "ShizukuCompat": {

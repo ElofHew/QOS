@@ -1,68 +1,45 @@
 <div align="center">
 
-# QOS
+# Quarter OS
 
 ![QuarterOS Logo](img/logo_b.png)
 
 A Professional **Fake-OS** Powered by Python 3
 
+![GitHub Repo Size](https://img.shields.io/github/repo-size/ElofHew/QOS)
+![GitHub Repo Stars](https://img.shields.io/github/stars/ElofHew/QOS?style=flat)
+![Github License](https://img.shields.io/github/license/ElofHew/QOS?style=flat)
+![GitHub Commit activity](https://img.shields.io/github/commit-activity/t/ElofHew/QOS)
+![GitHub Last Commit](https://img.shields.io/github/last-commit/ElofHew/QOS)
+![GitHub Created At](https://img.shields.io/github/created-at/ElofHew/QOS)
+![GitHub Issues](https://img.shields.io/github/issues/ElofHew/QOS)
+![GitHub Release](https://img.shields.io/github/v/release/ElofHew/QOS)
+
 </div>
 
 ## 介绍
 
-QOS 是一款基于 Python 3 的伪操作系统，由 [ElofHew](https://github.com/ElofHew) 开发。
+Quarter OS 是一款基于 Python 3 的伪操作系统，简称 **QOS**，由 [ElofHew](https://github.com/ElofHew) 开发。
+
+（注：QOS是Quarter Operation System的缩写，与网络技术中的“QoS”（Quality of Service，IP网络服务质量保证）无关。）
 
 &copy; 2025 [Oak Studio](https://t.me/oakstd) 版权所有。
 
-## 安装 Python3：
+## 一、配置Quarter OS
 
-请详阅 [Python3 安装帮助](docs/Install_Python3.md)
+详见 [Quarter OS 快速使用指南](docs/UserHelper/Quick_Use.md)
 
-## 安装依赖
+## 二、简单方法
 
-找到本存储库根目录的 `requirements.txt` 文件，使用 pip 安装依赖：
+安装好Python 3.10及以上版本后，**可以直接在常规命令行中运行** `run.py` （Windows使用PowerShell，Linux/macOS使用自带的终端）
 
-``` bash
-pip install -r requirements.txt
-```
+## 三、补充说明
 
-> [!TIP]
-> 如果你所在地区访问pypi速度较慢，可以尝试换源，比如 [清华大学镜像源](https://mirrors.tuna.tsinghua.edu.cn/help/pypi/) 或 [阿里云镜像源](https://developer.aliyun.com/mirror/pypi)。
+Quarter OS 当前版本处于开发阶段（Alpha），功能不完善，如有bug或建议，欢迎提交 issue。
 
-> [!NOTE]
-> 【20250622】当前版本：Alpha 0.1，需要的第三方库有：<br>
-> colorama<br>
-> 可以直接`pip install colorama`安装。
+目前不接受任何Pull Request，因为当前版本属于基础框架搭建，不需要过多开发者参与。
 
-## 运行 QOS
-
-找到本存储库以后，进入QOS文件夹下的system文件夹，并在此处打开终端，输入以下命令：
-
-**Windows**
-
-``` bash
-python qos.py
-```
-
-**macOS/Linux**
-
-``` bash
-python3 qos.py
-```
-
-然后 QOS 就会启动。
-
-## 补充说明
-
-QOS 当前版本处于开发阶段（Alpha），功能不完善，如有bug或建议，欢迎提交 issue。
-
-**账户及密码**
-
-root：123456
-
-admin：123456
-
-guest：无
+正式版预计于7月中上旬（7月15日前）发布，敬请期待。
 
 ------
 
