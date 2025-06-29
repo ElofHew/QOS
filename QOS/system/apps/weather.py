@@ -185,7 +185,7 @@ def main():
             os.system("cls")
         else:
             os.system("clear")
-        print(Style.DIM + Fore.GREEN + "Quarter OS Weather App" + Style.RESET_ALL)
+        print(Fore.GREEN + "Quarter OS Weather App" + Style.RESET_ALL)
         print(Fore.CYAN + "1. Get Weather" + Fore.RESET)
         print(Fore.CYAN + "2. Get Weather in Once" + Fore.RESET)
         print(Fore.CYAN + "3. Settings" + Fore.RESET)

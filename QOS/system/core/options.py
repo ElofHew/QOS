@@ -20,6 +20,7 @@ def cat(file_path):
         try:
             with open(file_path, "r") as f:
                 print(f.read())
+            f.close()
         except IOError as e:
             print(f"{Fore.RED}Error: Have some problems when reading file {file_path}. Error message: {e}{Style.RESET_ALL}")
         except Exception as e:

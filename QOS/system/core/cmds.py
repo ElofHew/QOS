@@ -1,7 +1,8 @@
 import os
 import sys
 import json
-import time
+import time as tm
+import datetime as dt
 import pathlib
 import platform
 from colorama import init as cinit
@@ -69,65 +70,70 @@ def check_args(command, args):
         return False
 
 # Need Args
-def cat(file_path):
+def cat(work_dir, file_path):
     try:
-        if not os.path.exists(file_path):
+        if not os.path.exists(os.path.join(work_dir, file_path)):
             print(f"{Fore.RED}Error: File '{file_path}' does not exist.{Style.RESET_ALL}")
             return
-        with open(file_path, "r") as f:
+        with open(os.path.join(work_dir, file_path), "r") as f:
             print(f.read())
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to read file. {e}{Style.RESET_ALL}")
 
-def echo(text):
-    if all(char in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?" for char in text):
-        print(text)
-    else:
-        print(f"{Fore.RED}Error: Invalid characters in text.{Style.RESET_ALL}")
+def echo(work_dir, text):
+    print(text)
 
-def cp(src, dst):
-    if not os.path.exists(src):
+def cp(work_dir, src, dst):
+    if not os.path.exists(os.path.join(work_dir, src)):
         print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
         return
-    if os.path.exists(dst):
+    if os.path.exists(os.path.join(work_dir, dst)):
         print(f"{Fore.YELLOW}Warning: Destination path '{dst}' already exists. It will be overwritten.{Style.RESET_ALL}")
     try:
-        shutil.copy(src, dst)
+        shutil.copy(os.path.join(work_dir, src), os.path.join(work_dir, dst))
         print(f"{Fore.GREEN}File copied successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
     except IOError as e:
         print(f"{Fore.RED}Error: Failed to copy file. {e}{Style.RESET_ALL}")
 
-def mv(src, dst):
-    if not os.path.exists(src):
+def mv(work_dir, src, dst):
+    if not os.path.exists(os.path.join(work_dir, src)):
         print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
         return
-    if os.path.exists(dst):
+    if os.path.exists(os.path.join(work_dir, dst)):
         print(f"{Fore.YELLOW}Warning: Destination path '{dst}' already exists. It will be overwritten.{Style.RESET_ALL}")
     try:
-        shutil.move(src, dst)
+        shutil.move(os.path.join(work_dir, src), os.path.join(work_dir, dst))
         print(f"{Fore.GREEN}File moved successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
     except IOError as e:
         print(f"{Fore.RED}Error: Failed to move file. {e}{Style.RESET_ALL}")
 
-def ls(work_path):
-    try:
-        if not os.path.exists(work_path):
-            print(f"{Fore.RED}Error: Path '{work_path}' does not exist.{Style.RESET_ALL}")
+def ls(work_dir, list_path):
+    if list_path == ".":
+        list_dir = work_dir
+    else:
+        try:
+            list_dir = os.path.join(work_dir, list_path)
+        except OSError:
+            print(f"{Fore.RED}Error: Invalid path '{list_path}'.{Style.RESET_ALL}")
             return
-        elif os.listdir(work_path) == []:
+    try:
+        if not os.path.exists(list_dir):
+            print(f"{Fore.RED}Error: Path '{list_path}' does not exist.{Style.RESET_ALL}")
+            return
+        elif os.listdir(list_dir) == []:
             print(f"{Fore.YELLOW}(This is an empty directory.){Style.RESET_ALL}")
         else:
-            for file in os.listdir(work_path):
-                if os.path.isfile(os.path.join(work_path, file)):
+            for file in os.listdir(list_dir):
+                if os.path.isfile(os.path.join(list_dir, file)):
                     print(f"{Fore.GREEN}{file}{Style.RESET_ALL}")
-                elif os.path.isdir(os.path.join(work_path, file)):
+                elif os.path.isdir(os.path.join(list_dir, file)):
                     print(f"{Fore.BLUE}{file}{Style.RESET_ALL}")
                 else:
                     print(f"{Fore.WHITE}{file}{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to list directory. {e}{Style.RESET_ALL}")
 
-def cd(change_dir, work_dir):
+def cd(work_dir, change_dir):
     with open("data/config/config.json", "r") as config_file:
         config = json.load(config_file)
         os_type = config["os_type"]
@@ -190,74 +196,77 @@ def cd(change_dir, work_dir):
         print(f"{Fore.RED}Error: Unsupported OS.{Style.RESET_ALL}")
         return work_dir
 
-def touch(file_path):
+def touch(work_dir, file_path):
     try:
-        if os.path.exists(file_path):
+        if os.path.exists(os.path.join(work_dir, file_path)):
             print(f"{Fore.YELLOW}Warning: File '{file_path}' already exists.{Style.RESET_ALL}")
         else:
-            with open(file_path, "w") as f:
+            with open(os.path.join(work_dir, file_path), "w") as f:
                 f.write("")
             print(f"{Fore.GREEN}File '{file_path}' created successfully.{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to create file. {e}{Style.RESET_ALL}")
 
-def edit(file_path):
+def edit(work_dir, file_path):
     try:
-        if not os.path.exists(file_path):
+        if not os.path.exists(os.path.join(work_dir, file_path)):
             print(f"{Fore.RED}Error: File '{file_path}' does not exist.{Style.RESET_ALL}")
             return
-        if os_type == "windows":
-            os.startfile(file_path)
-        elif os_type == "linux" or os_type == "macos":
-            subprocess.call(["xdg-open", file_path])
         else:
-            print(f"{Fore.RED}Error: Unsupported OS.{Style.RESET_ALL}")
+            if not file_path.endswith(".txt"):
+                print(f"{Fore.YELLOW}Warning: This file is not a text file. Please make sure you can read and write it directly.{Style.RESET_ALL}")
+            if os_type == "windows":
+                os.startfile(os.path.join(work_dir, file_path))
+            elif os_type == "linux" or os_type == "macos":
+                subprocess.call(["xdg-open", os.path.join(work_dir, file_path)])
+            else:
+                print(f"{Fore.RED}Error: Unsupported OS.{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to open file. {e}{Style.RESET_ALL}")
 
-def mkdir(work_path):
+def mkdir(work_dir, new_dir):
     try:
-        if os.path.exists(work_path):
-            print(f"{Fore.YELLOW}Warning: Path '{work_path}' already exists.{Style.RESET_ALL}")
+        if os.path.exists(os.path.join(work_dir, new_dir)):
+            print(f"{Fore.YELLOW}Warning: Path '{work_dir}' already exists.{Style.RESET_ALL}")
         else:
-            os.makedirs(work_path)
-            print(f"{Fore.GREEN}Directory '{work_path}' created successfully.{Style.RESET_ALL}")
+            os.makedirs(os.path.join(work_dir, new_dir))
+            print(f"{Fore.GREEN}Directory '{work_dir}' created successfully.{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to create directory. {e}{Style.RESET_ALL}")
 
-def rename(src, dst):
+def rename(work_dir, src, dst):
     try:
-        if not os.path.exists(src):
+        if not os.path.exists(os.path.join(work_dir, src)):
             print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
             return
-        if os.path.exists(dst):
+        if os.path.exists(os.path.join(work_dir, dst)):
             print(f"{Fore.YELLOW}Warning: Destination path '{dst}' already exists. It will be overwritten.{Style.RESET_ALL}")
-        os.rename(src, dst)
+        os.rename(os.path.join(work_dir, src), os.path.join(work_dir, dst))
         print(f"{Fore.GREEN}File renamed successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to rename file. {e}{Style.RESET_ALL}")
 
-def rm(work_path):
+def rm(work_dir, rm_path):
     try:
-        if not os.path.exists(work_path):
-            print(f"{Fore.RED}Error: Path '{work_path}' does not exist.{Style.RESET_ALL}")
+        if not os.path.exists(os.path.join(work_dir, rm_path)):
+            print(f"{Fore.RED}Error: Path '{rm_path}' does not exist.{Style.RESET_ALL}")
             return
-        if os.path.isfile(work_path):
-            os.remove(work_path)
-            print(f"{Fore.GREEN}File '{work_path}' removed successfully.{Style.RESET_ALL}")
-        elif os.path.isdir(work_path):
-            shutil.rmtree(work_path)
-            print(f"{Fore.GREEN}Directory '{work_path}' removed successfully.{Style.RESET_ALL}")
+        if os.path.isfile(os.path.join(work_dir, rm_path)):
+            os.remove(os.path.join(work_dir, rm_path))
+            print(f"{Fore.GREEN}File '{rm_path}' removed successfully.{Style.RESET_ALL}")
+        elif os.path.isdir(os.path.join(work_dir, rm_path)):
+            shutil.rmtree(os.path.join(work_dir, rm_path))
+            print(f"{Fore.GREEN}Directory '{rm_path}' removed successfully.{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to remove file or directory. {e}{Style.RESET_ALL}")
 
-def pwd(working_path):
-    print(pathlib.Path(working_path))
+# No Args
+def pwd(work_dir):
+    print(pathlib.Path(work_dir))
 
 def cwd():
     print(os.getcwd())
 
-# No Args
 def help():
     try:
         with open(os.path.join(qos_path, "system", "shell", "cmds.json"), "r") as cmds_file:
@@ -299,17 +308,17 @@ def whoami(username):
     print(f"{Fore.GREEN}Current user: {Fore.CYAN}{username}{Style.RESET_ALL}")
 
 def time():
-    print(f"{Fore.GREEN}Current time: {Fore.CYAN}{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}Current time: {Fore.CYAN}{tm.strftime('%H:%M:%S', tm.localtime())}{Style.RESET_ALL}")
 
 def date():
-    print(f"{Fore.GREEN}Current date: {Fore.CYAN}{time.strftime('%Y-%m-%d', time.localtime())}{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}Current date: {Fore.CYAN}{tm.strftime('%Y-%m-%d', tm.localtime())}{Style.RESET_ALL}")
 
 def sysinfo():
     print(f"{Fore.BLUE}& Quarter OS System Info &{Style.RESET_ALL}")
     print(f"{Fore.GREEN}Operating System: {Fore.CYAN}{platform.system()} {platform.release()}{Style.RESET_ALL}")
-    print(f"{Fore.GREEN}Current User: {Fore.CYAN}{last_login}{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}Python Version: {Fore.CYAN}{platform.python_version()}{Style.RESET_ALL}")
     print(f"{Fore.LIGHTMAGENTA_EX}Quarter OS Version: {Fore.CYAN}{qos_version}{Style.RESET_ALL}")
-    print(f"{Fore.LIGHTMAGENTA_EX}Python Version: {Fore.CYAN}{platform.python_version()}{Style.RESET_ALL}")
+    print(f"{Fore.LIGHTMAGENTA_EX}Current User: {Fore.CYAN}{last_login}{Style.RESET_ALL}")
     print(f"{Fore.LIGHTYELLOW_EX}QOS Path: {Fore.CYAN}{qos_path}{Style.RESET_ALL}")
 
 def clear():
@@ -339,3 +348,14 @@ def exit():
             print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
             clear()
             sys.exit(0)
+
+# PackageManager
+def pm_tips():
+    print(f"{Fore.LIGHTGREEN_EX}% Biscuit Package Manager %{Style.RESET_ALL}")
+    print(f"{Fore.LIGHTGREEN_EX}==========================={Style.RESET_ALL}")
+    print(f"{Fore.CYAN}install <path> - Install a package{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}remove <pkg>   - Remove a package{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}list           - List all installed packages{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}search <query> - Search a package{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}get <pkg>      - Get package from online repository (Comming Soon){Style.RESET_ALL}")
+    print(f"{Fore.CYAN}mirror <url>   - Set a mirror for package repository (Comming Soon){Style.RESET_ALL}")

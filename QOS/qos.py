@@ -2,8 +2,8 @@
 """
 # QOS - Quarter Operation System
 @ Author: ElofHew aka Dan_Evan
-@ Version: Alpha 0.1
-@ Date: 2025-06-22
+@ Version: Alpha 0.2
+@ Date: 2025-06-29
 @ License: GNU General Public License v3.0
 @ Description: A Professional Fake-OS Powered by Python3.
 """
@@ -38,6 +38,21 @@ except Exception as e:
 # 上面会检测你当前所在目录是否是QOS所在目录
 # 如果不是则不允许你启动，直接sys.exit(0)退出
 # 另外如果当前目录最后是"QOS"时，提示你再次cd QOS
+
+# Check Python Version （检测Python版本）
+try:
+    import sys, colorama
+    if sys.version_info.major < 3 or sys.version_info.minor < 10:
+        print(f"{colorama.Fore.RED}Error: QOS requires Python 3.10 or higher.{colorama.Fore.RESET}")
+        sys.exit(0)
+except ImportError as e:
+    print(f"Error: {e}")
+    sys.exit(0)
+except Exception as e:
+    print(f"Error: {e}")
+    sys.exit(0)
+# (20250629)解释一下：
+# 这里检测你是否安装了Python 3.10或更高版本，如果不是则不允许你启动，直接sys.exit(0)退出
 
 # Check Python Virtual Environment （检测Python虚拟环境）
 try:
@@ -102,7 +117,7 @@ try:
     # Import QOS Applications （本地应用）
     import system.opts.oobe as oobe
     import system.opts.komshell as komshell
-    import system.apps.settings as settings
+    import system.opts.settings as settings
 except ImportError as e:
     print(f"Error: {e}")
     print("Import Modules or QOS Core Failed.")

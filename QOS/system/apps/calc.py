@@ -6,7 +6,7 @@ from colorama import Fore, Back, Style, init
 init(autoreset=True)
 
 def main():
-    print(Style.DIM + Fore.GREEN + "Quarter OS Calculator" + Style.RESET_ALL)
+    print(Fore.GREEN + "Quarter OS Calculator" + Style.RESET_ALL)
     while True:
         try:
             input_text = input(Fore.CYAN + "> " + Style.RESET_ALL)

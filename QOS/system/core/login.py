@@ -134,7 +134,7 @@ def qos_login():
     while True:
         try:
             print(f"{Fore.LIGHTGREEN_EX}Enter a user name to login: {Style.RESET_ALL}")
-            username = input(">>> ")
+            username = input(">>> ").strip().lower().replace(" ", "_")
             user_found = False
             login_success = False
             for user_data in config.values():

@@ -25,10 +25,17 @@
         "rename": "Rename a file or directory",
         "rm": "Remove a file or directory"
     },
-    "PackageManager" : {
+    "SystemKit": {
+        "settings": "Open the system settings"
+    },
+    "PackageManager": {
         "biscuit": "Quarter OS Package Manager",
         "pkg": "A simple name to use Biscuit",
         "bkt": "A simple name to use Biscuit",
         "pm": "A simple name to use Biscuit"
+    },
+    "ShizukuCompat": {
+        "shizuku": "PY OS Improved Package Manager on Quarter OS",
+        "szk": "A simple name to use Shizuku"
     }
 }

@@ -31,7 +31,7 @@ def print_date():
         print(Fore.RED + "Invalid input. Please enter a valid year and month." + Style.RESET_ALL)
 
 def main():
-    print(Style.DIM + Fore.GREEN + "Quarter OS Calculator" + Style.RESET_ALL)
+    print(Fore.GREEN + "Quarter OS Calculator" + Style.RESET_ALL)
     get_date()
     while True:
         try:

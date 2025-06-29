@@ -68,8 +68,11 @@ def check_more_dir():
         if not os.path.exists("data/config/"):
             os.mkdir("data/config/")
             dir_created = True
-        if not os.path.exists("data/etc/"):
-            os.mkdir("data/etc/")
+        if not os.path.exists("data/apps/"):
+            os.mkdir("data/apps/")
+            dir_created = True
+        if not os.path.exists("data/temp/"):
+            os.mkdir("data/temp/")
             dir_created = True
         if not os.path.exists("home/"):
             os.mkdir("home/")
@@ -99,15 +102,18 @@ def check_path():
     qos_path = os.getcwd()
     data_path = os.path.join(qos_path, "data")
     home_path = os.path.join(qos_path, "home")
+    system_path = os.path.join(qos_path, "system")
     with open("data/config/config.json", "r") as qos_config_file:
         config_data = json.load(qos_config_file)
     json_qos_path = config_data.get("qos_path", "")
     json_data_path = config_data.get("data_path", "")
     json_home_path = config_data.get("home_path", "")
+    json_system_path = config_data.get("system_path", "")
     if json_qos_path != qos_path or json_data_path != data_path or json_home_path != home_path:
         config_data["qos_path"] = qos_path
         config_data["data_path"] = data_path
         config_data["home_path"] = home_path
+        config_data["system_path"] = system_path
         with open("data/config/config.json", "w") as qos_config_file:
             json.dump(config_data, qos_config_file, indent=4)
     else:

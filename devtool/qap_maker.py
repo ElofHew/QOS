@@ -58,12 +58,12 @@ def view_qap():
                 app_compat = info_json["comptb_os"]
                 app_bktver = info_json["biscuit_version"]
                 # Multi Value Support
-                app_tags_list = info_json["category"]
+                app_tags_list = info_json["tags"]
                 app_depends_list = info_json["depends"]
                 # Initalizing Variables
                 app_tags = [] if app_tags_list is not None else "None"
-                for category in app_tags_list:
-                    app_tags.append(category)
+                for tags in app_tags_list:
+                    app_tags.append(tags)
                 app_depends = [] if app_depends_list is not None else "None"
                 for depends in app_depends_list:
                     app_depends.append(depends)
@@ -152,12 +152,12 @@ def create_qap_print_info(app_files_dir):
             app_compat = info_json["comptb_os"]
             app_bktver = info_json["biscuit_version"]
             # Multi Value Support
-            app_tags_list = info_json["category"]
+            app_tags_list = info_json["tags"]
             app_depends_list = info_json["depends"]
             # Initalizing Variables
             app_tags = [] if app_tags_list is not None else "None"
-            for category in app_tags_list:
-                app_tags.append(category)
+            for tags in app_tags_list:
+                app_tags.append(tags)
             app_depends = [] if app_depends_list is not None else "None"
             for depends in app_depends_list:
                 app_depends.append(depends)
@@ -307,7 +307,7 @@ def create_qap_check_files(app_files_dir):
             print(Fore.YELLOW + "WARNING: 'info.json' not found. " + Fore.CYAN + "Would you like to create one by this program? (Y/N)" + Fore.RESET)
             while True:
                 try:
-                    create_info_json = str(input(Fore.YELLOW + "> " + Fore.RESET))
+                    create_info_json = str(input("> "))
                     if create_info_json.lower() == "y":
                         make_pg = create_qap_make_info_json(app_files_dir)
                         if make_pg == 1:

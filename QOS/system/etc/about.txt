@@ -5,7 +5,7 @@
           \__\_\  \___/  |____/          
                                          
 A Professional Fake-OS Powered by Python 3
-  \u00A9 2025 Oak Studio All Rights Reserved.  
+Copyright 2025 Oak Studio All Rights Reserved.
 
 GitHub Repo: https://github.com/ElofHew/QOS
 Telegram Channel: https://t.me/oakstdcn

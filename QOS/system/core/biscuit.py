@@ -20,8 +20,8 @@ with open("data/config/config.json", "r") as f:
     config = json.load(f)
     qos_path = config["qos_path"]
 
-def install(pkg_path):
-    ins_pkg_path = pkg_path
+def install(working_path, pkg_path):
+    ins_pkg_path = os.path.join(working_path, pkg_path)
     temp_path = os.path.join(qos_path,"data", "temp")
     apps_path = os.path.join(qos_path,"data", "apps")
     if not os.path.exists(ins_pkg_path):
@@ -224,12 +224,16 @@ def list():
             return 1
         else:
             print(f"{Fore.GREEN}Installed packages:{Fore.RESET}")
+            print(f"{Fore.CYAN}[Name]{Fore.RESET} - {Fore.GREEN}[Version]{Fore.RESET} - {Fore.BLUE}[Author]{Fore.RESET} - {Fore.YELLOW}[Category]{Fore.RESET} - {Fore.MAGENTA}[Description]{Fore.RESET}")
             for app_name in add_app_config:
                 app_version = add_app_config[app_name]["version"]
-                print(f"{Fore.CYAN}{app_name}{Fore.RESET} - {Fore.GREEN}{app_version}{Fore.RESET}")
+                app_author = add_app_config[app_name]["author"]
+                app_desc = add_app_config[app_name]["description"]
+                app_category = add_app_config[app_name]["category"]
+                print(f"{Fore.CYAN}{app_name}{Fore.RESET} - {Fore.GREEN}{app_version}{Fore.RESET} - {Fore.BLUE}{app_author}{Fore.RESET} - {Fore.YELLOW}{app_category}{Fore.RESET} - {Fore.MAGENTA}{app_desc}{Fore.RESET}")
             return 0
     except FileNotFoundError:
-        print(f"{Fore.RED}File 'apps.json' not found.{Fore.RESET}")
+        print(f"{Fore.RED}File 'apps.json' not found.\n{Fore.CYAN}Looks like you haven't installed any packages yet.{Fore.RESET}")
         return 1
     except Exception as e:
         print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
