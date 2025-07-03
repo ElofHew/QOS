@@ -12,10 +12,6 @@ import system.core.cmds as cmds
 
 cinit(autoreset=True)
 
-with open('data/config/config.json', 'r') as old_config_file:
-    old_config = json.load(old_config_file)
-    oobe_condition = old_config["oobe"]
-
 os_type = qoscore.check_os()
 os_path = qoscore.check_path()
 
@@ -24,6 +20,26 @@ class OOBE:
     def __init__(self):
         pass
     
+    # Ask to activate QOS
+    def activate_qos(self):
+        while True:
+            print(f"{Fore.LIGHTGREEN_EX}Please enter the activation code to activate QOS.{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTBLUE_EX}(If you don't have an activation code, please go to https://os.drevan.xyz/qos/activate/ to get one){Style.RESET_ALL}")
+            print(f"{Fore.LIGHTMAGENTA_EX}(Or you can skip this step (Input pass to skip), activate QOS later.){Style.RESET_ALL}")
+            code = input("> ")
+            if code == "pass":
+                print(f"{Fore.LIGHTGREEN_EX}Skip activation, Please activate QOS later.{Style.RESET_ALL}")
+                break
+            activate_condition = cmds.activate(code)
+            if activate_condition:
+                print(f"\n{Fore.LIGHTGREEN_EX}Congratulations! QOS has been activated successfully!{Style.RESET_ALL}")
+                break
+            else:
+                print(f"\n{Fore.RED}Invalid activation code. Please try again.{Style.RESET_ALL}")
+                time.sleep(1)
+                continue
+        input("(Press any key to continue.)")
+
     # Add User Account
     def add_user_account(self):
         # Set Default User Account
@@ -65,12 +81,16 @@ class OOBE:
 
     # OOBE Main Method
     def main(self):
+        with open('data/config/config.json', 'r') as config_file:
+            config_data = json.load(config_file)
+        oobe_condition = config_data.get("oobe", True)
         cmds.clear()
         if oobe_condition:
             pass
         else:
             print(f"{Fore.RED}You have already set up QOS.{Style.RESET_ALL}")
             sys.exit(0)
+        config_file.close()
         print(f"{Style.DIM}{Fore.YELLOW}Quarter OS OOBE - Alpha 0.2{Style.RESET_ALL}\n")
         time.sleep(1)
         self.eula()
@@ -81,9 +101,13 @@ class OOBE:
         self.add_user_account()
         time.sleep(1)
         cmds.clear()
+        self.activate_qos()
+        cmds.clear()
         print(f"{Style.BRIGHT}{Fore.LIGHTGREEN_EX}QOS has been set up successfully!\nWish you can enjoy QOS!{Style.RESET_ALL}")
         input("(Press any key to continue.)")
         # Write OOBE condition to config.json
+        with open('data/config/config.json', 'r') as old_config_file:
+            old_config = json.load(old_config_file)
         old_config["oobe"] = False
         with open('data/config/config.json', 'w') as new_config_file:
             json.dump(old_config, new_config_file, indent=4)

@@ -101,10 +101,13 @@ def confirm_user_account(username, password):
         while f"user{user_index}" in config:
             user_index += 1
         new_user_key = f"user{user_index}"
-        en_password = base64.b64encode(password.encode('utf-8')).decode('utf-8')
+        if password is None:
+            en_password = None
+        else:
+            en_password = base64.b64encode(password.encode('utf-8')).decode('utf-8')
         config[new_user_key] = {
             "username": username,
-            "password": en_password if en_password else None
+            "password": en_password
         }
         confirmation = input(f"{Fore.LIGHTCYAN_EX}Are you sure you want to add user '{username}'? (y/n): {Style.RESET_ALL}").strip().lower()
         if confirmation.lower() == 'y':
@@ -137,6 +140,9 @@ def qos_login():
             username = input(">>> ").strip().lower().replace(" ", "_")
             user_found = False
             login_success = False
+            if username == "":
+                print(f"{Fore.RED}Please enter a user name.{Style.RESET_ALL}")
+                continue
             for user_data in config.values():
                 if user_data["username"] == username:
                     user_found = True
@@ -148,6 +154,8 @@ def qos_login():
                         de_password = base64.b64decode(password).decode('utf-8')
             while True:
                 try:
+                    if login_success:
+                        break
                     print(f"{Fore.LIGHTGREEN_EX}Enter password: {Style.RESET_ALL}")
                     input_password = getpass.getpass(">>> ")
                     if input_password == de_password:

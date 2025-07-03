@@ -12,6 +12,7 @@ import zipfile  # 用于处理ZIP文件的压缩和解压缩
 import time     # 用于添加延迟
 import json     # 用于处理JSON文件的读取和写入
 import shutil   # 用于文件和目录的高级操作，如复制文件和删除文件夹等
+import requests # 用于处理HTTP请求
 from colorama import init, Fore, Back, Style  # 用于控制输出颜色
 
 init(autoreset=True)  # 初始化颜色模块
@@ -46,6 +47,7 @@ def install(working_path, pkg_path):
             app_json = json.load(app_json_f)
             app_name = app_json["name"]
             app_version = app_json["version"]
+            app_vcode = app_json["version_code"]
             app_author = app_json["author"]
             app_desc = app_json["description"]
             app_category = app_json["category"]
@@ -81,7 +83,7 @@ def install(working_path, pkg_path):
         if os.path.exists(app_dir):
             with open(os.path.join(app_dir, "info.json"), "r") as exist_app_json_f:
                 exist_app_json = json.load(exist_app_json_f)
-            if exist_app_json["version"] == app_version:
+            if exist_app_json["version_code"] == app_vcode:
                 print(f"{Fore.YELLOW}Package '{app_name}' already installed. Do you want to install it again? (y/n): {Fore.RESET}")
                 while True:
                     try:
@@ -98,11 +100,11 @@ def install(working_path, pkg_path):
                         print(Fore.RED + "Operation cancelled." + Fore.RESET)
                         return 1
                 shutil.rmtree(app_dir)
-            elif exist_app_json["version"] > app_version:
+            elif exist_app_json["version_code"] > app_vcode:
                 print(f"{Fore.YELLOW}There is a newer version of package '{app_name}'. You couldn't downgrade it.{Fore.RESET}")
                 input(f"{Fore.CYAN}(Press any key to continue.){Fore.RESET}")
                 return 1
-            elif exist_app_json["version"] < app_version:
+            elif exist_app_json["version_code"] < app_vcode:
                 print(f"{Fore.YELLOW}There is an older version of package '{app_name}'. Biscuit will upgrade it.{Fore.RESET}")
                 print(f"{Fore.CYAN}(Press any key to continue.){Fore.RESET}")
         shutil.copytree(temp_path, app_dir)
@@ -145,6 +147,7 @@ def install(working_path, pkg_path):
             add_app_config[app_name] = {
                 "path": app_dir,
                 "version": app_version,
+                "version_code": app_vcode,
                 "author": app_author,
                 "description": app_desc,
                 "category": app_category,
@@ -255,6 +258,74 @@ def search(keyword):
             return 0
     except FileNotFoundError:
         print(f"{Fore.RED}File 'apps.json' not found.{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
+        return 1
+
+def get(app_name, app_version):
+    try:
+        with open(os.path.join("data", "config", "config.json"), "r") as config_f:
+            config_json = json.load(config_f)
+            repo_url = config_json["biscuit_repo"]
+        repo_app_list = requests.get(f"{repo_url}/apps.json").json()
+        if app_name in repo_app_list:
+            app_category = repo_app_list[app_name]["category"]
+        else:
+            print(f"{Fore.RED}Invalid package name.{Fore.RESET}")
+            return 1
+        app_cg_url = f"{repo_url}/{app_category}/"
+        app_pkg_info_response = requests.get(f"{app_cg_url}/package.json")
+        app_pkg_info = app_pkg_info_response.json()
+        if app_version == None:
+            app_ver = app_pkg_info[app_name]["latest_version"]
+        else:
+            if app_version in app_pkg_info[app_name]["version"]:
+                app_ver = str(app_version)
+            else:
+                print(f"{Fore.RED}Invalid package version. You can choose latest version: {app_pkg_info[app_name]['latest_version']}.{Fore.RESET}")
+                return 1
+        app_url = f"{app_cg_url}/{app_name}/{app_name + '_' + app_ver + '.qap'}"
+        response = requests.get(app_url)
+        if response.status_code == 200:
+            down_path = os.path.join("data", "temp", "biscuit")
+            os.makedirs(down_path, exist_ok=True)
+            down_file = os.path.join(down_path, app_name + "_" + app_ver + ".qap")
+            with open(down_file, "wb") as app_pkg_f:
+                app_pkg_f.write(response.content)
+            print(f"{Fore.GREEN}Package '{app_name}' downloaded successfully.{Fore.RESET}")
+        else:
+            print(f"{Fore.RED}Failed to download package '{app_name}'.{Fore.RESET}")
+            return 1
+        install(qos_path, os.path.join("data", "temp", "biscuit", app_name + "_" + app_ver + ".qap"))
+    except FileNotFoundError:
+        print(f"{Fore.RED}File 'config.json' not found.{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
+        return 1
+    
+def mirror(repo_url):
+    try:
+        apps_json_url = f"{repo_url}/apps.json"
+        apps_json_response = requests.get(apps_json_url)
+        if apps_json_response.status_code != 200:
+            print(f"{Fore.RED}Cannot connect to repository, status code: {apps_json_response.status_code}{Fore.RESET}")
+            return 1
+        data_dir = os.path.join("data")
+        config_path = os.path.join(data_dir, "config", "config.json")
+        with open(config_path, "r") as config_f:
+            config_json = json.load(config_f)
+        config_json["biscuit_repo"] = repo_url
+        with open(config_path, "w") as config_f:
+            json.dump(config_json, config_f, indent=4)
+        print(f"{Fore.GREEN}Biscuit Package Repository has been set to '{repo_url}'。{Fore.RESET}")
+        return 0
+    except FileNotFoundError:
+        print(f"{Fore.RED}File 'config.json' not found.{Fore.RESET}")
+        return 1
+    except requests.exceptions.RequestException as e:
+        print(f"{Fore.RED}Request error: {e}{Fore.RESET}")
         return 1
     except Exception as e:
         print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")

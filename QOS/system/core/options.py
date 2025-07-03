@@ -68,7 +68,7 @@ def change_qos_logo_text():
     while True:
         new_type = input("> ")
         if new_type in ["1", "2", "3", "4"]:
-            config_file_old["qos_logo_path"] = f"etc/logo/{new_type}.txt"
+            config_file_old["qos_startup_logo"] = f"{new_type}"
             break
         elif new_type == "":
             print(f"{Fore.YELLOW}No changes made.{Style.RESET_ALL}")

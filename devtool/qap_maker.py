@@ -50,6 +50,7 @@ def view_qap():
                 info_json = json.load(f)
                 app_name = info_json["name"]
                 app_version = info_json["version"]
+                app_vcode = info_json["version_code"]
                 app_author = info_json["author"]
                 app_desc = info_json["description"]
                 app_category = info_json["category"]
@@ -70,6 +71,7 @@ def view_qap():
                 # Convert empty values to None
                 app_name = str(app_name) if app_name is not None else "None"
                 app_version = str(app_version) if app_version is not None else "None"
+                app_vcode = str(app_vcode) if app_vcode is not None else "None"
                 app_author = str(app_author) if app_author is not None else "None"
                 app_desc = str(app_desc) if app_desc is not None else "None"
                 app_category = str(app_category) if app_category is not None else "None"
@@ -80,6 +82,7 @@ def view_qap():
             # Printing the values
             print(Fore.LIGHTBLUE_EX + "Application Name: " + Fore.GREEN + app_name + Fore.RESET)
             print(Fore.LIGHTBLUE_EX + "Application Version: " + Fore.GREEN + app_version + Fore.RESET)
+            print(Fore.LIGHTBLUE_EX + "Application Version Code: " + Fore.GREEN + app_vcode + Fore.RESET)
             print(Fore.LIGHTBLUE_EX + "Application Author: " + Fore.GREEN + app_author + Fore.RESET)
             print(Fore.LIGHTBLUE_EX + "Application Description: " + Fore.GREEN + app_desc + Fore.RESET)
             print(Fore.LIGHTBLUE_EX + "Application Category: " + Fore.GREEN + app_category + Fore.RESET)
@@ -144,6 +147,7 @@ def create_qap_print_info(app_files_dir):
             # 11 Values in total
             app_name = info_json["name"]
             app_version = info_json["version"]
+            app_vcode = info_json["version_code"]
             app_author = info_json["author"]
             app_desc = info_json["description"]
             app_category = info_json["category"]
@@ -164,6 +168,7 @@ def create_qap_print_info(app_files_dir):
             # Convert empty values to None
             app_name = str(app_name) if app_name is not None else "None"
             app_version = str(app_version) if app_version is not None else "None"
+            app_vcode = str(app_vcode) if app_vcode is not None else "None"
             app_author = str(app_author) if app_author is not None else "None"
             app_desc = str(app_desc) if app_desc is not None else "None"
             app_category = str(app_category) if app_category is not None else "None"
@@ -174,6 +179,7 @@ def create_qap_print_info(app_files_dir):
         # Printing the values
         print(Fore.LIGHTBLUE_EX + "Application Name: " + Fore.GREEN + app_name + Fore.RESET)
         print(Fore.LIGHTBLUE_EX + "Application Version: " + Fore.GREEN + app_version + Fore.RESET)
+        print(Fore.LIGHTBLUE_EX + "Application Version Code: " + Fore.GREEN + app_vcode + Fore.RESET)
         print(Fore.LIGHTBLUE_EX + "Application Author: " + Fore.GREEN + app_author + Fore.RESET)
         print(Fore.LIGHTBLUE_EX + "Application Description: " + Fore.GREEN + app_desc + Fore.RESET)
         print(Fore.LIGHTBLUE_EX + "Application Category: " + Fore.GREEN + app_category + Fore.RESET)
@@ -209,6 +215,7 @@ def create_qap_make_info_json(app_files_dir):
     try:
         app_name = str(input(Fore.YELLOW + "Enter the name of your application: " + Fore.RESET))
         app_version = str(input(Fore.YELLOW + "Enter the version of your application: " + Fore.RESET))
+        app_vcode = str(input(Fore.YELLOW + "Enter the version code of your application: " + Fore.RESET))
         app_author = str(input(Fore.YELLOW + "Enter the author of your application: " + Fore.RESET))
         app_desc = str(input(Fore.YELLOW + "Enter a brief description of your application: " + Fore.RESET))
         app_category = str(input(Fore.YELLOW + "Enter the category of your application: " + Fore.RESET))
@@ -238,6 +245,7 @@ def create_qap_make_info_json(app_files_dir):
         info_json = {
             "name": app_name,
             "version": app_version,
+            "version_code": app_vcode,
             "author": app_author,
             "description": app_desc,
             "category": app_category,

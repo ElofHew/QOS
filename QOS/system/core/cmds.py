@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import json
 import time as tm
@@ -49,14 +50,16 @@ def args_tips(command):
         print(f"{Fore.YELLOW}Usage: mkdir <directory_path>{Style.RESET_ALL}")
     elif command == "rm":
         print(f"{Fore.YELLOW}Usage: rm <file_path>{Style.RESET_ALL}")
-    elif command == "rmdir":
-        print(f"{Fore.YELLOW}Usage: rmdir <directory_path>{Style.RESET_ALL}")
+    elif command == "rename":
+        print(f"{Fore.YELLOW}Usage: rename <old_name> <new_name>{Style.RESET_ALL}")
+    elif command == "activate":
+        print(f"{Fore.YELLOW}Usage: activate <activate_code>{Style.RESET_ALL}")
     else:
         print(f"{Fore.RED}Error: Unknown command '{command}'.{Style.RESET_ALL}")
 
 # Check Args from user input
 def check_args(command, args):
-    if command in ("cat", "echo", "ls", "cd", "touch", "edit", "mkdir", "rm"):
+    if command in ("cat", "echo", "ls", "cd", "touch", "edit", "mkdir", "rm", "activate"):
         if len(args) == 1:
             return True
         else:
@@ -260,6 +263,87 @@ def rm(work_dir, rm_path):
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to remove file or directory. {e}{Style.RESET_ALL}")
 
+def activate(code):
+    with open("data/config/config.json", "r") as config_file:
+        config = json.load(config_file)
+    activate_code = config["activate_code"]
+    qos_edition = config["qos_edition"]
+    activate_statue = config["activate_statue"]
+    if code == "check":
+        if activate_statue:
+            print(f"{Fore.GREEN}Quarter OS is activated.{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}Your Quarter OS edition is {Fore.LIGHTGREEN_EX}{qos_edition} Edition{Fore.CYAN} and your activate code is {Fore.LIGHTGREEN_EX}{activate_code}{Fore.CYAN}.{Style.RESET_ALL}")
+            return True
+        else:
+            print(f"{Fore.RED}Quarter OS is not activated.{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}Please activate Quarter OS by {Fore.LIGHTGREEN_EX}activate <activate_code>{Fore.CYAN}.\nYou can get the activate code from the Quarter OS website: https://os.drevan.xyz/qos/activate. {Style.RESET_ALL}")
+            return False
+    if code == "deactivate":
+        with open("data/config/config.json", "r") as config_file:
+            config = json.load(config_file)
+        config["activate_code"] = ""
+        config["qos_edition"] = ""
+        config["activate_statue"] = False
+        with open("data/config/config.json", "w") as config_file:
+            json.dump(config, config_file, indent=4)
+        print(f"{Fore.GREEN}Quarter OS deactivated successfully.{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}Please restart Quarter OS to take effect.{Style.RESET_ALL}")
+        return True
+    if activate_statue:
+        while True:
+            try:
+                print(f"{Fore.YELLOW}WARNING: You have already activated Quarter OS. Are you sure to activate again? (y/n){Fore.RESET}")
+                cfm = input("> ").strip().lower()
+                if cfm == "y":
+                    break
+                elif cfm == "n":
+                    return 0
+                else:
+                    print(f"{Fore.RED}Invalid input. Please enter 'y' or 'n'.{Style.RESET_ALL}")
+            except KeyboardInterrupt:
+                print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
+                sys.exit(0)
+    try:
+        if not len(code) == 5:
+            raise ValueError
+        if not re.match(r'^[SHPUL]\d{4}', code):
+            raise ValueError
+        if not 1000 <= int(code[1:]) <= 9999:
+            raise ValueError
+    except ValueError:
+        print(f"{Fore.RED}Error: Invalid activate code. Please enter a valid code.{Style.RESET_ALL}")
+        print(f"{Fore.LIGHTCYAN_EX}You can get the activate code from the Quarter OS website: https://os.drevan.xyz/qos/activate. {Style.RESET_ALL}")
+        return 1
+    if code.startswith("S"):
+        qos_act_type = "Starter"
+    elif code.startswith("H"):
+        qos_act_type = "Home"
+    elif code.startswith("P"):
+        qos_act_type = "Professional"
+    elif code.startswith("U"):
+        qos_act_type = "Ultimate"
+    elif code.startswith("L"):
+        qos_act_type = "LongTermSupport"
+    else:
+        qos_act_type = "Unknown"
+    # Update Config.json
+    config["activate_code"] = code
+    config["qos_edition"] = qos_act_type
+    config["activate_statue"] = True
+    with open("data/config/config.json", "w") as config_file:
+        json.dump(config, config_file, indent=4)
+    # Reopen Config.json to fetch updated data
+    with open("data/config/config.json", "r") as config_file:
+        config = json.load(config_file)
+        activate_code = config["activate_code"]
+        qos_edition = config["qos_edition"]
+        activate_statue = config["activate_statue"]
+    config_file.close()
+    print(f"{Fore.GREEN}Quarter OS activated successfully.{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}Your Quarter OS edition is {Fore.LIGHTGREEN_EX}{qos_edition} Edition{Fore.CYAN} and your activate code is {Fore.LIGHTGREEN_EX}{activate_code}{Fore.CYAN}.{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}You best restart Quarter OS to take effect. (Except for OOBE){Style.RESET_ALL}")
+    return True
+
 # No Args
 def pwd(work_dir):
     print(pathlib.Path(work_dir))
@@ -274,6 +358,8 @@ def help():
             noargs_list = cmds_list["NoArgs"]
             needargs_list = cmds_list["NeedArgs"]
             pm_cmds_list = cmds_list["PackageManager"]
+            szk_cmds_list = cmds_list["ShizukuCompat"]
+            sysapp_list = cmds_list["SystemApps"]
     except FileNotFoundError:
         print(f"{Fore.RED}Error: Failed to load commands list.{Style.RESET_ALL}")
         return
@@ -282,6 +368,8 @@ def help():
         return
     print(f"{Fore.YELLOW}% Quarter OS - Help Menu %{Style.RESET_ALL}")
     print(f"{Fore.YELLOW}=========================={Style.RESET_ALL}")
+    print(f"{Fore.GREEN}settings{Style.RESET_ALL}: Quarter OS Settings App")
+    print(f"{Fore.YELLOW}=========={Style.RESET_ALL}")
     for cmd, desc in noargs_list.items():
         print(f"{Fore.GREEN}{cmd}{Style.RESET_ALL}: {desc}")
     print(f"{Fore.YELLOW}=========={Style.RESET_ALL}")
@@ -291,7 +379,13 @@ def help():
     for cmd, desc in pm_cmds_list.items():
         print(f"{Fore.GREEN}{cmd}{Style.RESET_ALL}: {desc}")
     print(f"{Fore.YELLOW}=========={Style.RESET_ALL}")
-    print(f"{Fore.BLUE}For Third-party commands, please enter 'biscuit list'.{Style.RESET_ALL}")
+    for cmd, desc in szk_cmds_list.items():
+        print(f"{Fore.GREEN}{cmd}{Style.RESET_ALL}: {desc}")
+    print(f"{Fore.YELLOW}=========={Style.RESET_ALL}")
+    for cmd, desc in sysapp_list.items():
+        print(f"{Fore.GREEN}{cmd}{Style.RESET_ALL}: {desc}")
+    print(f"{Fore.YELLOW}=========={Style.RESET_ALL}")
+    print(f"{Fore.BLUE}For Third-party Apps, please enter 'biscuit list'.{Style.RESET_ALL}")
     if ucp:
         print(f"{Fore.LIGHTGREEN_EX}Tips: Unknown command progression is enabled. Unknown commands will be executed as system commands.{Style.RESET_ALL}")
     else:
@@ -314,6 +408,9 @@ def date():
     print(f"{Fore.GREEN}Current date: {Fore.CYAN}{tm.strftime('%Y-%m-%d', tm.localtime())}{Style.RESET_ALL}")
 
 def sysinfo():
+    with open("data/config/config.json", "r") as config_file:
+        config = json.load(config_file)
+        last_login = config["last_login"]
     print(f"{Fore.BLUE}& Quarter OS System Info &{Style.RESET_ALL}")
     print(f"{Fore.GREEN}Operating System: {Fore.CYAN}{platform.system()} {platform.release()}{Style.RESET_ALL}")
     print(f"{Fore.GREEN}Python Version: {Fore.CYAN}{platform.python_version()}{Style.RESET_ALL}")
@@ -357,5 +454,36 @@ def pm_tips():
     print(f"{Fore.CYAN}remove <pkg>   - Remove a package{Style.RESET_ALL}")
     print(f"{Fore.CYAN}list           - List all installed packages{Style.RESET_ALL}")
     print(f"{Fore.CYAN}search <query> - Search a package{Style.RESET_ALL}")
-    print(f"{Fore.CYAN}get <pkg>      - Get package from online repository (Comming Soon){Style.RESET_ALL}")
-    print(f"{Fore.CYAN}mirror <url>   - Set a mirror for package repository (Comming Soon){Style.RESET_ALL}")
+    print(f"{Fore.CYAN}get <pkg> (V)  - Get package from online repository{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}mirror <url>   - Set a mirror for package repository{Style.RESET_ALL}")
+
+def pm_check_args(args, working_path):
+    import system.core.biscuit as biscuit
+    if args[0] == "list":
+        biscuit.list()
+        return 0
+    if args[0] == "install":
+        if len(args) == 2:
+            biscuit.install(working_path, args[1])
+            return 0
+    if args[0] == "remove":
+        if len(args) == 2:
+            biscuit.remove(args[1])
+            return 0
+    if args[0] == "search":
+        if len(args) == 2:
+            biscuit.search(args[1])
+            return 0
+    if args[0] == "get":
+        if len(args) == 2:
+            biscuit.get(args[1], None)
+            return 0
+        if len(args) == 3:
+            biscuit.get(args[1], args[2])
+            return 0
+    if args[0] == "mirror":
+        if len(args) == 2:
+            biscuit.mirror(args[1])
+            return 0
+    pm_tips()
+    del biscuit

@@ -133,7 +133,7 @@ cmds.clear()
 with open("data/config/config.json", "r") as qos_config_file:
     config_file = json.load(qos_config_file)
     os_type = config_file["os_type"]
-    qos_logo_path = config_file["qos_logo_path"]
+    qos_startup_logo = config_file["qos_startup_logo"]
     version = config_file["version"]
     startup_title = config_file["startup_title"]
     oobe_condition = config_file["oobe"]
@@ -152,6 +152,11 @@ def second_boot():
     except KeyboardInterrupt:
         print(f"{Fore.YELLOW}(KeyboardInterrupt){Style.RESET_ALL}")
         sys.exit(0)
+    with open("data/config/config.json", "r") as qos_config_file:
+        config_data = json.load(qos_config_file)
+    config_data["last_login"] = username
+    with open("data/config/config.json", "w") as qos_config_file:
+        json.dump(config_data, qos_config_file, indent=4)
     print(" " + Fore.LIGHTBLUE_EX + str(startup_title) + Style.RESET_ALL + " ")
     time.sleep(1)
     print(f"\n{Fore.GREEN}QOS will start in 3 seconds...{Style.RESET_ALL}")
@@ -164,7 +169,7 @@ def second_boot():
 
 # main function （主函数）
 def main():
-    qos_logo = pathlib.Path(qos_logo_path)
+    qos_logo = os.path.join("system", "etc", "logo", qos_startup_logo + ".txt")
     qos_startup = pathlib.Path("system/etc/startup.txt")
     qos_version = str(version)
     print(f"{Style.DIM}Quarter Operation System{Style.RESET_ALL}\n")

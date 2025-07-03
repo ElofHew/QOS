@@ -40,7 +40,6 @@ def case_more_commands(shell_command, working_path):
         else:
             print(f"{Fore.RED}Error: {Style.RESET_ALL}Found the command: {shell_command}, but you cannot run it directly.")
     except AttributeError:
-        keyboard_interrupt_caught = False
         try:
             current_script_path = os.path.join(working_path, shell_command + ".py")
             if os.path.isfile(current_script_path):
@@ -76,10 +75,10 @@ def case_more_commands(shell_command, working_path):
             process.kill()
         except subprocess.CalledProcessError:
             print(f"{Fore.RED}Process terminated with error code:{Style.RESET_ALL} {process.returncode}")
+            return False
         except KeyboardInterrupt:
-            if not keyboard_interrupt_caught:
-                print(f"{Fore.YELLOW}Process terminated.{Style.RESET_ALL}")
-                keyboard_interrupt_caught = True
+            print(f"{Fore.YELLOW}Process terminated.{Style.RESET_ALL}")
+            return False
         except FileNotFoundError:
             print(f"{Fore.RED}Program not found:{Style.RESET_ALL} {shell_command}")
         except Exception as e:
@@ -93,7 +92,6 @@ def case_more_commands(shell_command, working_path):
 
 def main(username):
     print(Style.DIM + Fore.YELLOW + "Kom Shell for QOS - " + version + Style.RESET_ALL + "\n")
-    keyboard_interrupt_caught_shell = False
     # Initialize home directory
     default_path = os.path.join(home_path, username)
     # Initialize working directory
@@ -138,6 +136,8 @@ def main(username):
                         if check_status:
                             if command == "cd":
                                 working_path = cmds.cd(working_path, args[0])
+                            if command == "activate":
+                                cmds.activate(args[0])
                             else:
                                 run_cmd = getattr(cmds, command)
                                 run_cmd(working_path, *args)
@@ -149,25 +149,10 @@ def main(username):
                         settings.main()
                         del settings
                 case [command, *args] if command in supported_cmds["PackageManager"]:
-                    import system.core.biscuit as biscuit
                     if args == []:
                         cmds.pm_tips()
                     else:
-                        if args[0] == "install":
-                            biscuit.install(working_path, args[1])
-                        elif args[0] == "remove":
-                            biscuit.remove(args[1])
-                        elif args[0] == "list":
-                            biscuit.list()
-                        elif args[0] == "search":
-                            biscuit.search(args[1])
-                        elif args[0] == "get":
-                            print(f"{Fore.LIGHTGREEN_EX}Comming Soon!{Style.RESET_ALL}")
-                        elif args[0] == "mirror":
-                            print(f"{Fore.LIGHTGREEN_EX}Comming Soon!{Style.RESET_ALL}")
-                        else:
-                            cmds.pm_tips()
-                    del biscuit
+                        cmds.pm_check_args(args, working_path)
                 case [command, *args] if command in supported_cmds["ShizukuCompat"]:
                     import system.core.shizuku as shizuku
                     if args == []:
@@ -187,21 +172,11 @@ def main(username):
                 case _:
                     case_more_commands(shell_command, working_path)
         except KeyboardInterrupt:
-            if not keyboard_interrupt_caught_shell:
-                print(f"{Style.DIM}{Fore.YELLOW}(Keyboard Detected){Style.RESET_ALL}")
-                statue = cmds.exit()
-                if statue == "0":
-                    keyboard_interrupt_caught_shell = False
-                else:
-                    keyboard_interrupt_caught_shell = True
+            print(f"{Style.DIM}{Fore.YELLOW}(Keyboard Detected){Style.RESET_ALL}")
+            cmds.exit()
         except EOFError:
-            if not keyboard_interrupt_caught_shell:
-                print(f"{Style.DIM}{Fore.YELLOW}(EOF Detected){Style.RESET_ALL}")
-                statue = cmds.exit()
-                if statue == "0":
-                    keyboard_interrupt_caught_shell = False
-                else:
-                    keyboard_interrupt_caught_shell = True
+            print(f"{Style.DIM}{Fore.YELLOW}(EOF Detected){Style.RESET_ALL}")
+            cmds.exit()
         except Exception as e:
             print(f"Error: {e}")
             cmds.clear()

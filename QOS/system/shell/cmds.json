@@ -23,7 +23,8 @@
         "edit": "Edit a file",
         "mkdir": "Create a new directory",
         "rename": "Rename a file or directory",
-        "rm": "Remove a file or directory"
+        "rm": "Remove a file or directory",
+        "activate": "Activate Quarter OS by using Activate Code"
     },
     "SystemKit": {
         "settings": "Open the system settings"
@@ -38,5 +39,11 @@
     "ShizukuCompat": {
         "shizuku": "PY OS Improved Package Manager on Quarter OS",
         "szk": "A simple name to use Shizuku"
+    },
+    "SystemApps": {
+        "calc": "A simple calculator",
+        "calender": "A simple calendar",
+        "weather": "A simple weather app",
+        "console": "A simple Python console"
     }
 }
