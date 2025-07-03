@@ -41,7 +41,18 @@ def case_more_commands(shell_command, working_path):
             print(f"{Fore.RED}Error: {Style.RESET_ALL}Found the command: {shell_command}, but you cannot run it directly.")
     except AttributeError:
         try:
-            current_script_path = os.path.join(working_path, shell_command + ".py")
+            if shell_command.startswith("./"):
+                if shell_command.endswith(".py"):
+                    if os.path.isfile(os.path.join(working_path, shell_command)):
+                        current_script_path = os.path.join(working_path, shell_command)
+                    else:
+                        current_script_path = os.path.join(working_path, shell_command + ".py")
+                else:
+                    current_script_path = os.path.join(working_path, shell_command + ".py")
+            else:
+                if os.path.isfile(os.path.join(working_path, shell_command + ".py")):
+                    print(f"{Fore.YELLOW}WARNING: If you want to run this python program, please add './' before the program name.{Style.RESET_ALL}")
+                    return
             if os.path.isfile(current_script_path):
                 os.chdir(working_path)
                 if os_type == "windows":

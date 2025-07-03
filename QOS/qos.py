@@ -98,6 +98,7 @@ try:
     import sys
     import time
     import json
+    import random
     import base64
     import shutil
     import zipfile
