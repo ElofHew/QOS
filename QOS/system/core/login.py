@@ -138,13 +138,14 @@ def qos_login():
         try:
             print(f"{Fore.LIGHTGREEN_EX}Enter a user name to login: {Style.RESET_ALL}")
             username = input(">>> ").strip().lower().replace(" ", "_")
-            user_found = False
-            login_success = False
             if username == "":
                 print(f"{Fore.RED}Please enter a user name.{Style.RESET_ALL}")
                 continue
+            user_found = False
+            login_success = False
+            de_password = ""
             for user_data in config.values():
-                if user_data["username"] == username:
+                if user_data.get("username") == username:
                     user_found = True
                     password = user_data.get("password", "")
                     if not password:
@@ -152,6 +153,10 @@ def qos_login():
                         break
                     else:
                         de_password = base64.b64decode(password).decode('utf-8')
+                        break
+            if not user_found:
+                print(f"{Fore.RED}User not found. Please try again.{Style.RESET_ALL}")
+                continue
             while True:
                 try:
                     if login_success:
@@ -165,11 +170,9 @@ def qos_login():
                         config["last_login"] = username
                         with open(os.path.join(os.getcwd(), "data", "config", "config.json"), "w") as config_file:
                             json.dump(config, config_file, indent=4)
-                        config_file.close()
                         break
                     else:
                         print(Fore.RED + "Incorrect password, please try again." + Style.RESET_ALL)
-                        login_success = False
                         continue
                 except KeyboardInterrupt:
                     print(f"{Style.DIM}{Fore.GREEN}(Change User Account){Style.RESET_ALL}")
@@ -179,10 +182,7 @@ def qos_login():
                     break
                 except Exception as e:
                     print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
-                    login_success = False
                     break
-            if not user_found:
-                print(f"{Fore.RED}User not found.{Style.RESET_ALL}")
             if login_success:
                 print()
                 options.jump_print(" Welcome to QOS ", Fore.MAGENTA, Style.BRIGHT)

@@ -25,9 +25,6 @@ with open('data/config/config.json', 'r') as config_file:
     home_path = config["home_path"]
     data_path = config["data_path"]
     last_login = config["last_login"]
-with open('data/config/shell.json', 'r') as shell_file:
-    shell_config = json.load(shell_file)
-    ucp = shell_config["unknown_command_progression"]
 
 # Tips to use Args
 def args_tips(command):
@@ -85,6 +82,16 @@ def cat(work_dir, file_path):
             print(f.read())
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to read file. {e}{Style.RESET_ALL}")
+        return
+    except UnicodeDecodeError:
+        print(f"{Fore.RED}Error: File '{file_path}' is not a text file or is encoded in an unsupported format.{Style.RESET_ALL}")
+        return
+    except FileNotFoundError:
+        print(f"{Fore.RED}Error: File '{file_path}' not found.{Style.RESET_ALL}")
+        return
+    except Exception as e:
+        print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+        return
 
 def echo(work_dir, text):
     print(text)
@@ -394,6 +401,9 @@ def help():
         print(f"{Fore.GREEN}{cmd}{Style.RESET_ALL}: {desc}")
     print(f"{Fore.YELLOW}=========={Style.RESET_ALL}")
     print(f"{Fore.BLUE}For Third-party Apps, please enter 'biscuit list'.{Style.RESET_ALL}")
+    with open(os.path.join(data_path, "config", "shell.json"), "r") as apps_file:
+        apps_config = json.load(apps_file)
+        ucp = apps_config["unknown_command_progression"]
     if ucp:
         print(f"{Fore.LIGHTGREEN_EX}Tips: Unknown command progression is enabled. Unknown commands will be executed as system commands.{Style.RESET_ALL}")
     else:
@@ -419,10 +429,15 @@ def sysinfo():
     with open("data/config/config.json", "r") as config_file:
         config = json.load(config_file)
         last_login = config["last_login"]
+        activate_statue = config["activate_statue"]
+        qos_edition = config["qos_edition"]
     print(f"{Fore.BLUE}& Quarter OS System Info &{Style.RESET_ALL}")
     print(f"{Fore.GREEN}Operating System: {Fore.CYAN}{platform.system()} {platform.release()}{Style.RESET_ALL}")
     print(f"{Fore.GREEN}Python Version: {Fore.CYAN}{platform.python_version()}{Style.RESET_ALL}")
     print(f"{Fore.LIGHTMAGENTA_EX}Quarter OS Version: {Fore.CYAN}{qos_version}{Style.RESET_ALL}")
+    print(f"{Fore.LIGHTMAGENTA_EX}Activate Condition: {Fore.CYAN}{str(activate_statue)}{Style.RESET_ALL}")
+    if activate_statue:
+        print(f"{Fore.LIGHTMAGENTA_EX}Quarter OS Edition: {Fore.CYAN}{qos_edition}{Style.RESET_ALL}")
     print(f"{Fore.LIGHTMAGENTA_EX}Current User: {Fore.CYAN}{last_login}{Style.RESET_ALL}")
     print(f"{Fore.LIGHTYELLOW_EX}QOS Path: {Fore.CYAN}{qos_path}{Style.RESET_ALL}")
 
@@ -499,6 +514,9 @@ def pm_check_args(args, working_path):
 # Run more commands
 
 def ucprogress(shell_command, working_path):
+    with open(os.path.join(data_path, "config", "shell.json"), "r") as apps_file:
+        apps_config = json.load(apps_file)
+        ucp = apps_config["unknown_command_progression"]
     try:
         if ucp:
             os.chdir(working_path)

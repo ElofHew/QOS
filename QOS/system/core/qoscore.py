@@ -7,6 +7,18 @@ import json
 import platform
 import pathlib
 
+def get_locale():
+    """
+    Get the system locale.
+    Returns:
+        str: The system locale in the format 'language_COUNTRY'.
+    """
+    try:
+        return os.environ.get('LANG', 'en_US').split('.')[0]
+    except Exception as e:
+        print(f"Error getting locale: {e}")
+        return 'en_US'
+
 def check_home_dir():
     user_file_path = pathlib.Path("data/config/users.json")
     if not user_file_path.exists():
