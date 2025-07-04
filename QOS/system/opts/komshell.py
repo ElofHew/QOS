@@ -5,6 +5,7 @@ try:
     import os
     import sys
     import json
+    import shlex
     import subprocess
     import time
     import pathlib
@@ -13,6 +14,7 @@ try:
     from colorama import Fore, Style, Back
     # Core modules
     import system.core.cmds as cmds
+    from system.core.options import get_ads
 except ImportError as e:
     print(f"Error: {e}")
     sys.exit(1)
@@ -42,51 +44,23 @@ def case_more_commands(shell_command, working_path):
     except AttributeError:
         try:
             if shell_command.startswith("./"):
-                if shell_command.endswith(".py"):
-                    if os.path.isfile(os.path.join(working_path, shell_command)):
-                        current_script_path = os.path.join(working_path, shell_command)
-                    else:
-                        current_script_path = os.path.join(working_path, shell_command + ".py")
+                if os.path.isfile(os.path.join(working_path, shell_command[2:] + ".py")):
+                    current_script_path = os.path.join(working_path, shell_command[2:] + ".py")
+                    cmds.run_local_prog(working_path, current_script_path)
+                elif os.path.isfile(os.path.join(working_path, shell_command[2:])):
+                    current_script_path = os.path.join(working_path, shell_command[2:])
+                    cmds.run_local_prog(working_path, current_script_path)
                 else:
-                    current_script_path = os.path.join(working_path, shell_command + ".py")
+                    cmds.run_sys_apps(shell_command[2:], working_path)
             else:
                 if os.path.isfile(os.path.join(working_path, shell_command + ".py")):
-                    print(f"{Fore.YELLOW}WARNING: If you want to run this python program, please add './' before the program name.{Style.RESET_ALL}")
-                    return
-            if os.path.isfile(current_script_path):
-                os.chdir(working_path)
-                if os_type == "windows":
-                    process = subprocess.Popen(["python", current_script_path])
+                    print(f"{Fore.YELLOW}WARNING: If you want to run this python program, please add './' before the command.{Style.RESET_ALL}")
+                    return False
+                elif os.path.isfile(os.path.join(working_path, shell_command)):
+                    print(f"{Fore.YELLOW}WARNING: If you want to run this python program, please add './' before the command.{Style.RESET_ALL}")
+                    return False
                 else:
-                    process = subprocess.Popen(["python3", current_script_path])
-                os.chdir(qos_path)
-            else:
-                system_app_path = os.path.join(qos_path, "system", "apps", shell_command + ".py")
-                if os.path.isfile(system_app_path):
-                    if os_type == "windows":
-                        process = subprocess.Popen(["python", system_app_path])
-                    else:
-                        process = subprocess.Popen(["python3", system_app_path])
-                else:
-                    third_party_script_path = os.path.join(qos_path, "data", "apps", shell_command, "main.py")
-                    if os.path.isfile(third_party_script_path):
-                        os.chdir(os.path.join(qos_path, "data", "apps", shell_command))
-                        if os_type == "windows":
-                            process = subprocess.Popen(["python", third_party_script_path])
-                        else:
-                            process = subprocess.Popen(["python3", third_party_script_path])
-                        os.chdir(qos_path)
-                    else:
-                        if ucp:
-                            process = subprocess.Popen(shell_command, shell=True)
-                        else:
-                            print(f"{Fore.RED}Unknown command:{Style.RESET_ALL} {shell_command}")
-                            return
-            process.wait()
-            process.kill()
-        except subprocess.CalledProcessError:
-            print(f"{Fore.RED}Process terminated with error code:{Style.RESET_ALL} {process.returncode}")
-            return False
+                    cmds.run_sys_apps(shell_command, working_path)
         except KeyboardInterrupt:
             print(f"{Fore.YELLOW}Process terminated.{Style.RESET_ALL}")
             return False
@@ -107,6 +81,8 @@ def main(username):
     default_path = os.path.join(home_path, username)
     # Initialize working directory
     working_path = default_path
+    # Get ADs
+    get_ads()
     # Start shell loop
     try:
         with open(os.path.join(qos_path,"system", "shell", "cmds.json"), "r") as supported_cmds_file:
@@ -122,12 +98,12 @@ def main(username):
             if working_path == default_path:
                 tip_path = "~"
             elif working_path.startswith(default_path):
-                tip_path = "~ " + str(pathlib.Path(working_path).relative_to(home_path))
+                tip_path = str(pathlib.Path(working_path).relative_to(home_path))
             else:
                 tip_path = working_path
             shell_command = input(f"{Back.LIGHTBLUE_EX}[QOS]{Back.WHITE}{Fore.BLACK} {time.strftime('%H:%M:%S')} {Back.GREEN}{Fore.WHITE} {username} {Style.RESET_ALL} > {Fore.LIGHTGREEN_EX}{tip_path} $ {Style.RESET_ALL}")
             # Run shell commands
-            match shell_command.split(" "):
+            match shlex.split(shell_command):
                 case [command] if command in supported_cmds["NoArgs"]:
                     if command == "whoami":
                         cmds.whoami(username)
@@ -147,8 +123,6 @@ def main(username):
                         if check_status:
                             if command == "cd":
                                 working_path = cmds.cd(working_path, args[0])
-                            if command == "activate":
-                                cmds.activate(args[0])
                             else:
                                 run_cmd = getattr(cmds, command)
                                 run_cmd(working_path, *args)

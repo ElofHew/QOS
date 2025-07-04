@@ -98,6 +98,7 @@ try:
     import sys
     import time
     import json
+    import shlex
     import random
     import base64
     import shutil
@@ -178,7 +179,7 @@ def main():
     options.cat(qos_logo)
     options.cat(qos_startup)
     print("")
-    time.sleep(1)
+    options.get_ads()
 
 # Start QOS （启动QOS）
 if __name__ == "__main__":

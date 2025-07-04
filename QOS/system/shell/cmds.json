@@ -24,7 +24,8 @@
         "mkdir": "Create a new directory",
         "rename": "Rename a file or directory",
         "rm": "Remove a file or directory",
-        "activate": "Activate Quarter OS by using Activate Code"
+        "activate": "Activate Quarter OS by using Activate Code",
+        "ping": "Check the network connection to a host"
     },
     "SystemKit": {
         "settings": "Open the system settings"

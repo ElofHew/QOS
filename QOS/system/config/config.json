@@ -9,6 +9,7 @@
     "qos_edition": null,
     "activate_code": null,
     "activate_statue": false,
+    "ad_statue": true,
     "data_path": null,
     "home_path": null,
     "system_path": null,

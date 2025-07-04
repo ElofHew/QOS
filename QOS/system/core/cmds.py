@@ -6,6 +6,7 @@ import time as tm
 import datetime as dt
 import pathlib
 import platform
+import requests
 from colorama import init as cinit
 from colorama import Fore, Style, Back
 import shutil
@@ -54,12 +55,14 @@ def args_tips(command):
         print(f"{Fore.YELLOW}Usage: rename <old_name> <new_name>{Style.RESET_ALL}")
     elif command == "activate":
         print(f"{Fore.YELLOW}Usage: activate <activate_code>{Style.RESET_ALL}")
+    elif command == "ping":
+        print(f"{Fore.YELLOW}Usage: ping <host>{Style.RESET_ALL}")
     else:
         print(f"{Fore.RED}Error: Unknown command '{command}'.{Style.RESET_ALL}")
 
 # Check Args from user input
 def check_args(command, args):
-    if command in ("cat", "echo", "ls", "cd", "touch", "edit", "mkdir", "rm", "activate"):
+    if command in ("cat", "echo", "ls", "cd", "touch", "edit", "mkdir", "rm", "activate", "ping"):
         if len(args) == 1:
             return True
         else:
@@ -78,7 +81,7 @@ def cat(work_dir, file_path):
         if not os.path.exists(os.path.join(work_dir, file_path)):
             print(f"{Fore.RED}Error: File '{file_path}' does not exist.{Style.RESET_ALL}")
             return
-        with open(os.path.join(work_dir, file_path), "r") as f:
+        with open(os.path.join(work_dir, file_path), "r", encoding="utf-8") as f:
             print(f.read())
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to read file. {e}{Style.RESET_ALL}")
@@ -128,75 +131,62 @@ def ls(work_dir, list_path):
         else:
             for file in os.listdir(list_dir):
                 if os.path.isfile(os.path.join(list_dir, file)):
-                    print(f"{Fore.GREEN}{file}{Style.RESET_ALL}")
+                    print(f"{Fore.LIGHTGREEN_EX}{file}{Style.RESET_ALL}")
                 elif os.path.isdir(os.path.join(list_dir, file)):
-                    print(f"{Fore.BLUE}{file}{Style.RESET_ALL}")
+                    print(f"{Fore.LIGHTBLUE_EX}{file}{Style.RESET_ALL}")
                 else:
                     print(f"{Fore.WHITE}{file}{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to list directory. {e}{Style.RESET_ALL}")
 
 def cd(work_dir, change_dir):
-    with open("data/config/config.json", "r") as config_file:
-        config = json.load(config_file)
-        os_type = config["os_type"]
-    if os_type == "windows":
-        # 检查 change_dir 是否以盘符开头
-        if change_dir.startswith(tuple(f"{chr(x)}:\\" for x in range(67, 91))):
-            if os.path.exists(change_dir):
-                return os.path.abspath(change_dir)
-            else:
-                print(f"{Fore.RED}Error: Path '{change_dir}' not found.{Style.RESET_ALL}")
-                return work_dir
+    try:
         # 处理当前目录
-        elif change_dir in (".", '"."'):
+        if change_dir in (".", '"."'):
             return work_dir
-        # 展开环境变量
-        elif change_dir.startswith("%") or change_dir.startswith('"%'):
-            expanded_path = os.path.expandvars(change_dir)
-            if os.path.exists(expanded_path):
-                return os.path.abspath(expanded_path)
+        elif change_dir == "~":
+            with open("data/config/config.json", "r", encoding="utf-8") as config_file:
+                config = json.load(config_file)
+                last_login = config.get("last_login", "")
+            user_dir = os.path.join(home_path, last_login)
+            if os.path.exists(user_dir):
+                return os.path.abspath(user_dir)
             else:
-                print(f"{Fore.RED}Error: Path '{expanded_path}' not found.{Style.RESET_ALL}")
+                print(f"{Fore.RED}Error: Home directory for user '{last_login}' not found.{Style.RESET_ALL}")
                 return work_dir
         else:
+            # 处理驱动器根目录
+            if len(change_dir) == 2 and change_dir[1] == ':':
+                drive = change_dir.upper() + '\\'
+                if os.path.exists(drive):
+                    return drive
+                else:
+                    print(f"{Fore.RED}Error: Drive '{drive}' not found.{Style.RESET_ALL}")
+                    return work_dir
+            
+            # 处理相对路径
             new_path = os.path.join(work_dir, change_dir)
             if os.path.exists(new_path):
                 return os.path.abspath(new_path)
             else:
-                print(f"{Fore.RED}Error: Path '{new_path}' not found.{Style.RESET_ALL}")
-                return work_dir
-    elif os_type in ("linux", "macos"):
-        # 检查 change_dir 是否以根路径开头
-        if change_dir.startswith("/") or change_dir.startswith('"/'):
-            path = change_dir.strip('"')
-            if os.path.exists(path):
-                return os.path.abspath(path)
-            else:
-                print(f"{Fore.RED}Error: Path '{path}' not found.{Style.RESET_ALL}")
-                return work_dir
-        # 处理当前目录
-        elif change_dir in (".", '"."'):
-            return work_dir
-        # 展开用户主目录
-        elif change_dir.startswith("~") or change_dir.startswith('"~'):
-            path = change_dir.strip('"')
-            home_dir = os.path.expanduser("~")
-            new_path = os.path.join(home_dir, path[1:] if path.startswith("~") else path)
-            if os.path.exists(new_path):
-                return os.path.abspath(new_path)
-            else:
-                print(f"{Fore.RED}Error: Path '{new_path}' not found.{Style.RESET_ALL}")
-                return work_dir
-        else:
-            new_path = os.path.join(work_dir, change_dir)
-            if os.path.exists(new_path):
-                return os.path.abspath(new_path)
-            else:
-                print(f"{Fore.RED}Error: Path '{new_path}' not found.{Style.RESET_ALL}")
-                return work_dir
-    else:
-        print(f"{Fore.RED}Error: Unsupported OS.{Style.RESET_ALL}")
+                # 处理绝对路径
+                new_path = os.path.abspath(change_dir)
+                if os.path.exists(new_path):
+                    return new_path
+                else:
+                    print(f"{Fore.RED}Error: Path '{change_dir}' not found.{Style.RESET_ALL}")
+                    return work_dir
+    except FileNotFoundError:
+        print(f"{Fore.RED}Error: Configuration file 'data/config/config.json' not found.{Style.RESET_ALL}")
+        return work_dir
+    except OSError as e:
+        print(f"{Fore.RED}Error: Failed to change directory. {e}{Style.RESET_ALL}")
+        return work_dir
+    except json.JSONDecodeError as e:
+        print(f"{Fore.RED}Error: Failed to decode configuration file. {e}{Style.RESET_ALL}")
+        return work_dir
+    except Exception as e:
+        print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
         return work_dir
 
 def touch(work_dir, file_path):
@@ -233,7 +223,7 @@ def mkdir(work_dir, new_dir):
             print(f"{Fore.YELLOW}Warning: Path '{work_dir}' already exists.{Style.RESET_ALL}")
         else:
             os.makedirs(os.path.join(work_dir, new_dir))
-            print(f"{Fore.GREEN}Directory '{work_dir}' created successfully.{Style.RESET_ALL}")
+            print(f"{Fore.GREEN}Directory '{new_dir}' created successfully.{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to create directory. {e}{Style.RESET_ALL}")
 
@@ -263,7 +253,7 @@ def rm(work_dir, rm_path):
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to remove file or directory. {e}{Style.RESET_ALL}")
 
-def activate(code):
+def activate(work_dir, code):
     with open("data/config/config.json", "r") as config_file:
         config = json.load(config_file)
     activate_code = config["activate_code"]
@@ -343,6 +333,24 @@ def activate(code):
     print(f"{Fore.CYAN}Your Quarter OS edition is {Fore.LIGHTGREEN_EX}{qos_edition} Edition{Fore.CYAN} and your activate code is {Fore.LIGHTGREEN_EX}{activate_code}{Fore.CYAN}.{Style.RESET_ALL}")
     print(f"{Fore.YELLOW}You best restart Quarter OS to take effect. (Except for OOBE){Style.RESET_ALL}")
     return True
+
+def ping(working_dir, host):
+    try:
+        if os_type == "windows":
+            ping_result = subprocess.run(["ping", "-n", "4", host])
+        elif os_type == "linux":
+            ping_result = subprocess.run(["ping", "-c", "4", host])
+        if ping_result.returncode == 0:
+            print(f"{Fore.GREEN}Ping to {host} successful.{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}Ping to {host} failed.{Style.RESET_ALL}")
+            print(f"{Fore.RED}Error message: {ping_result.stderr}{Style.RESET_ALL}")
+    except subprocess.CalledProcessError as e:
+        print(f"{Fore.RED}Error: Failed to run ping command. {e}{Style.RESET_ALL}")
+        return
+    except FileNotFoundError:
+        print(f"{Fore.RED}Error: Ping command not found. Please check your system configuration.{Style.RESET_ALL}")
+        return
 
 # No Args
 def pwd(work_dir):
@@ -487,3 +495,114 @@ def pm_check_args(args, working_path):
             return 0
     pm_tips()
     del biscuit
+
+# Run more commands
+
+def ucprogress(shell_command, working_path):
+    try:
+        if ucp:
+            os.chdir(working_path)
+            process = subprocess.Popen(shell_command, shell=True)
+        else:
+            print(f"{Fore.RED}Unknown command:{Style.RESET_ALL} {shell_command}")
+            return
+        process.wait()
+        process.kill()
+    except subprocess.CalledProcessError as e:
+        print(f"{Fore.RED}Error: Failed to run command '{shell_command}'. {e}{Style.RESET_ALL}")
+        return False
+    except OSError as e:
+        print(f"{Fore.RED}Error: Failed to run command '{shell_command}'. {e}{Style.RESET_ALL}")
+        return False
+    except Exception as e:
+        print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+        return False
+    finally:
+        os.chdir(qos_path)
+
+def run_3rd_party_apps(shell_command, working_path):
+    try:
+        if os.path.isfile(os.path.join("data", "shell", "apps.json")):
+            with open(os.path.join("data", "shell", "apps.json"), "r") as apps_file:
+                apps_list = json.load(apps_file)
+            if shell_command in apps_list:
+                app_path = apps_list[shell_command]["path"]
+            else:
+                ucprogress(shell_command, working_path)
+                return
+        else:
+            ucprogress(shell_command, working_path)
+            return
+        third_party_script_path = os.path.join(qos_path, "data", "apps", shell_command, "main.py")
+        if third_party_script_path == os.path.join(app_path, "main.py"):
+            if os.path.isfile(third_party_script_path):
+                os.chdir(os.path.join(qos_path, "data", "apps", shell_command))
+                if os_type == "windows":
+                    process = subprocess.Popen(["python", third_party_script_path])
+                else:
+                    process = subprocess.Popen(["python3", third_party_script_path])
+                process.wait()
+                process.kill()
+                os.chdir(qos_path)
+            else:
+                ucprogress(shell_command, working_path)
+        else:
+            ucprogress(shell_command, working_path)
+            return
+    except subprocess.CalledProcessError as e:
+        print(f"{Fore.RED}Error: Failed to run {shell_command}. {e}{Style.RESET_ALL}")
+        return False
+    except OSError as e:
+        print(f"{Fore.RED}Error: Failed to run {shell_command}. {e}{Style.RESET_ALL}")
+        return False
+    except Exception as e:
+        print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+        return False
+    finally:
+        os.chdir(qos_path)
+
+def run_sys_apps(shell_command, working_path):
+    try:
+        system_app_path = os.path.join(qos_path, "system", "apps", shell_command + ".py")
+        if os.path.isfile(system_app_path):
+            if os_type == "windows":
+                process = subprocess.Popen(["python", system_app_path])
+            else:
+                process = subprocess.Popen(["python3", system_app_path])
+            process.wait()
+            process.kill()
+        else:
+            run_3rd_party_apps(shell_command, working_path)
+    except subprocess.CalledProcessError as e:
+        print(f"{Fore.RED}Error: Failed to run {shell_command}. {e}{Style.RESET_ALL}")
+        return False
+    except OSError as e:
+        print(f"{Fore.RED}Error: Failed to run {shell_command}. {e}{Style.RESET_ALL}")
+        return False
+    except Exception as e:
+        print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+        return False
+    finally:
+        os.chdir(qos_path)
+
+def run_local_prog(working_path, current_script_path):
+    try:
+        os.chdir(working_path)
+        if os_type == "windows":
+            process = subprocess.Popen(["python", current_script_path])
+        else:
+            process = subprocess.Popen(["python3", current_script_path])
+        process.wait()
+        process.kill()
+        os.chdir(qos_path)
+    except subprocess.CalledProcessError as e:
+        print(f"{Fore.RED}Error: Failed to run {current_script_path}. {e}{Style.RESET_ALL}")
+        return False
+    except OSError as e:
+        print(f"{Fore.RED}Error: Failed to run {current_script_path}. {e}{Style.RESET_ALL}")
+        return False
+    except Exception as e:
+        print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+        return False
+    finally:
+        os.chdir(qos_path)

@@ -30,7 +30,7 @@ class OOBE:
             if code == "pass":
                 print(f"{Fore.LIGHTGREEN_EX}Skip activation, Please activate QOS later.{Style.RESET_ALL}")
                 break
-            activate_condition = cmds.activate(code)
+            activate_condition = cmds.activate(None, code)
             if activate_condition:
                 print(f"\n{Fore.LIGHTGREEN_EX}Congratulations! QOS has been activated successfully!{Style.RESET_ALL}")
                 break

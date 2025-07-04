@@ -83,7 +83,8 @@ def general_settings():
         print(Fore.GREEN + "# General Settings #")
         print(Fore.CYAN + "1 - Change Startup Title")
         print(Fore.CYAN + "2 - Change QOS Logo Text")
-        print(Fore.CYAN + "3 - Back" + Fore.RESET)
+        print(Fore.CYAN + "3 - Manage ADs")
+        print(Fore.CYAN + "4 - Back" + Fore.RESET)
         settings2_choice = input("> ")
         if settings2_choice == "1":
             options.change_startup_title()
@@ -92,6 +93,9 @@ def general_settings():
             options.change_qos_logo_text()
             continue
         elif settings2_choice == "3":
+            options.manage_ads()
+            continue
+        elif settings2_choice == "4":
             return
         else:
             print("Invalid choice. Please try again.")
