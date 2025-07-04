@@ -107,6 +107,8 @@ python3 Quarter OS.py
 | mkdir| 创建新目录 | mkdir <目录名> |
 | rename | 重命名文件或目录 | rename <源文件/目录> <目标文件/目录> |
 | rm   | 删除文件或目录 | rm <文件/目录> |
+| activate | 激活QuarterOS | activate <激活码>（check用于检测激活状态） |
+| ping | 测试网络连接 | ping <域名或IP地址> |
 
 **（Biscuit软件包管理器）**
 
@@ -118,8 +120,8 @@ python3 Quarter OS.py
 | biscuit remove <软件包名> | 卸载软件包 |
 | biscuit search <软件包名> | 搜索软件包 |
 | biscuit list | 列出已安装的软件包 |
-| biscuit get <软件包名> | 下载软件包（未实现） |
-| biscuit mirror | 更改软件包镜像源（未实现） |
+| biscuit get <软件包名> | 下载软件包 |
+| biscuit mirror <镜像源> | 更改软件包镜像源 |
 
 **（兼容PYOSI的Shizuku软件包管理器）**
 
