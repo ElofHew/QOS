@@ -4,6 +4,7 @@ try:
     import os
     import json
     import sys
+    import time as tm
     import base64
     import pathlib
     import getpass
@@ -124,7 +125,7 @@ def confirm_user_account(username, password):
 
 def qos_login():
     try:
-        with open("data/config/users.json", "r") as qos_user_file:
+        with open(os.path.join("data", "config", "users.json"), "r") as qos_user_file:
             config = json.load(qos_user_file)
     except FileNotFoundError:
         print(Fore.RED + "File 'users.json' not found, please check the file path." + Style.RESET_ALL)
@@ -141,6 +142,10 @@ def qos_login():
             if username == "":
                 print(f"{Fore.RED}Please enter a user name.{Style.RESET_ALL}")
                 continue
+            if username == "exit":
+                print(f"{Fore.RED}Exiting...{Style.RESET_ALL}")
+                cmds.clear()
+                sys.exit(1)
             user_found = False
             login_success = False
             de_password = ""
@@ -168,6 +173,7 @@ def qos_login():
                         with open(os.path.join(os.getcwd(), "data", "config", "config.json"), "r") as config_file:
                             config = json.load(config_file)
                         config["last_login"] = username
+                        config["last_login_time"] = tm.strftime("%Y-%m-%d %H:%M:%S", tm.localtime())
                         with open(os.path.join(os.getcwd(), "data", "config", "config.json"), "w") as config_file:
                             json.dump(config, config_file, indent=4)
                         break

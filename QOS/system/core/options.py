@@ -2,9 +2,9 @@
 
 import os
 import json
-import sys
 import time
 import random
+import platform
 import requests
 from colorama import init as cinit
 from colorama import Fore, Style, Back
@@ -32,21 +32,36 @@ def get_ads():
             print(f"{Fore.YELLOW}(Tips: You can disable ads in the settings.){Style.RESET_ALL}")
         if activate_statue == True and ad_statue == False:
             return 1
-        response = requests.get("https://os.drevan.xyz/qosres/common/ad.data")
+        response = requests.get("https://os.drevan.xyz/qosres/common/ad.data", timeout=5)
         if response.status_code == 200:  # 检查请求是否成功
             ad_list = response.json()  # 假设ad.data是JSON格式的数据
             print(f"{Fore.LIGHTGREEN_EX}AD: {Fore.CYAN}{random.choice(ad_list)}{Style.RESET_ALL}")
             print()
             return 1
+    except requests.exceptions.Timeout:
+        print(f"{Fore.RED}Error: Failed to retrieve ads. (Timeout){Style.RESET_ALL}")
+        return 0
     except requests.RequestException as e:
         print(f"{Fore.RED}Error: Failed to retrieve ads. Error message: {e}{Style.RESET_ALL}")
         return 0
     except json.JSONDecodeError as e:
         print(f"{Fore.RED}Error: Failed to decode ad data. Error message: {e}{Style.RESET_ALL}")
         return 0
+    except KeyboardInterrupt:
+        print(f"{Fore.YELLOW}(KeyboardInterrupt){Style.RESET_ALL}")
+        return 0
     except Exception as e:
         print(f"{Fore.RED}Error: An unexpected error occurred while retrieving ads. Error message: {e}{Style.RESET_ALL}")
         return 0    
+
+def clear():
+    os_type = platform.system()
+    if os_type == "Windows":
+        os.system("cls")
+    elif os_type == "Linux":
+        os.system("clear")
+    else:
+        print(f"{Fore.RED}Error: Unsupported OS type.{Style.RESET_ALL}")
 
 def cat(file_path):
     txt_path = pathlib.Path(file_path)

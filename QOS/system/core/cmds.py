@@ -3,12 +3,11 @@ import re
 import sys
 import json
 import time as tm
-import datetime as dt
 import pathlib
 import platform
 import requests
 from colorama import init as cinit
-from colorama import Fore, Style, Back
+from colorama import Fore, Style
 import shutil
 import subprocess
 
@@ -54,12 +53,14 @@ def args_tips(command):
         print(f"{Fore.YELLOW}Usage: activate <activate_code>{Style.RESET_ALL}")
     elif command == "ping":
         print(f"{Fore.YELLOW}Usage: ping <host>{Style.RESET_ALL}")
+    elif command == "down":
+        print(f"{Fore.YELLOW}Usage: down <url>{Style.RESET_ALL}")
     else:
         print(f"{Fore.RED}Error: Unknown command '{command}'.{Style.RESET_ALL}")
 
 # Check Args from user input
 def check_args(command, args):
-    if command in ("cat", "echo", "ls", "cd", "touch", "edit", "mkdir", "rm", "activate", "ping"):
+    if command in ("cat", "echo", "ls", "cd", "touch", "edit", "mkdir", "rm", "activate", "ping", "down"):
         if len(args) == 1:
             return True
         else:
@@ -359,6 +360,27 @@ def ping(working_dir, host):
         print(f"{Fore.RED}Error: Ping command not found. Please check your system configuration.{Style.RESET_ALL}")
         return
 
+def down(working_dir, url):
+    try:
+        response = requests.get(url, stream=True)
+        if response.status_code == 200:
+            file_name = url.split("/")[-1]
+            down_path = os.path.join(home_path, last_login, "downloads")
+            file_path = os.path.join(down_path, file_name)
+            if not os.path.exists(down_path):
+                os.makedirs(down_path)
+            if os.path.exists(file_path):
+                print(f"{Fore.YELLOW}Warning: File '{file_name}' already exists in '{down_path}'. It will be overwritten.{Style.RESET_ALL}")
+            with open(file_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=1024):
+                    f.write(chunk)
+            print(f"{Fore.LIGHTGREEN_EX}Download file successfully.{Fore.RESET}")
+            print(f"{Fore.CYAN}Path: {file_path}{Fore.RESET}")
+        else:
+            print(f"{Fore.RED}Download file failed. Code: {response.status_code}{Fore.RESET}")
+    except Exception as e:
+        print(f"{Fore.RED}Download file failed. Error: {e}{Fore.RESET}")
+
 # No Args
 def pwd(work_dir):
     print(pathlib.Path(work_dir))
@@ -459,9 +481,26 @@ def exit():
             exit_cfm = input("> ").strip().lower()
             if exit_cfm == "y":
                 clear()
-                sys.exit()
+                return True
             elif exit_cfm == "n":
-                return 0
+                return False
+            else:
+                print(f"{Fore.RED}Invalid input. Please enter 'y' or 'n'.{Style.RESET_ALL}")
+        except KeyboardInterrupt:
+            print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
+            clear()
+            sys.exit(0)
+
+def reboot():
+    print(f"{Fore.CYAN}Are you sure you want to reboot? (y/n){Style.RESET_ALL}")
+    while True:
+        try:
+            reboot_cfm = input("> ").strip().lower()
+            if reboot_cfm == "y":
+                clear()
+                return True
+            elif reboot_cfm == "n":
+                return False
             else:
                 print(f"{Fore.RED}Invalid input. Please enter 'y' or 'n'.{Style.RESET_ALL}")
         except KeyboardInterrupt:

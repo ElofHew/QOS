@@ -10,7 +10,8 @@
         "date": "Show the current date",
         "sysinfo": "Show system information",
         "clear": "Clear the console",
-        "exit": "Exit QOS"
+        "exit": "Exit QOS",
+        "reboot": "Reboot QOS"
     },
     "NeedArgs": {
         "cat": "Show the content of a file",
@@ -25,7 +26,8 @@
         "rename": "Rename a file or directory",
         "rm": "Remove a file or directory",
         "activate": "Activate Quarter OS by using Activate Code",
-        "ping": "Check the network connection to a host"
+        "ping": "Check the network connection to a host",
+        "down": "Download a file from the internet"
     },
     "SystemKit": {
         "settings": "Open the system settings"

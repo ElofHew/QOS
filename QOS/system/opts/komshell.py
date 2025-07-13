@@ -98,7 +98,7 @@ def main(username):
             if working_path == default_path:
                 tip_path = "~"
             elif working_path.startswith(default_path):
-                tip_path = str(pathlib.Path(working_path).relative_to(home_path))
+                tip_path = "~ " + str(pathlib.Path(working_path).relative_to(os.path.join(home_path, username)))
             else:
                 tip_path = working_path
             shell_command = input(f"{Back.LIGHTBLUE_EX}[QOS]{Back.WHITE}{Fore.BLACK} {time.strftime('%H:%M:%S')} {Back.GREEN}{Fore.WHITE} {username} {Style.RESET_ALL} > {Fore.LIGHTGREEN_EX}{tip_path} $ {Style.RESET_ALL}")
@@ -109,6 +109,14 @@ def main(username):
                         cmds.whoami(username)
                     elif command == "pwd":
                         cmds.pwd(working_path)
+                    elif command == "exit":
+                        exit_statu = cmds.exit()
+                        if exit_statu:
+                            return 0
+                    elif command == "reboot":
+                        reboot_statu = cmds.reboot()
+                        if reboot_statu:
+                            return 1
                     else:
                         run_cmd = getattr(cmds, command)
                         run_cmd()
@@ -155,13 +163,17 @@ def main(username):
                             shizuku.tips()
                     del shizuku
                 case _:
+                    if shell_command.strip() == "":
+                        continue
                     case_more_commands(shell_command, working_path)
         except KeyboardInterrupt:
             print(f"{Style.DIM}{Fore.YELLOW}(Keyboard Detected){Style.RESET_ALL}")
             cmds.exit()
+            return 0
         except EOFError:
             print(f"{Style.DIM}{Fore.YELLOW}(EOF Detected){Style.RESET_ALL}")
             cmds.exit()
+            return 0
         except Exception as e:
             print(f"Error: {e}")
             cmds.clear()

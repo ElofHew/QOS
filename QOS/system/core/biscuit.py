@@ -106,7 +106,13 @@ def install(working_path, pkg_path):
                 return 1
             elif exist_app_json["version_code"] < app_vcode:
                 print(f"{Fore.YELLOW}There is an older version of package '{app_name}'. Biscuit will upgrade it.{Fore.RESET}")
-                print(f"{Fore.CYAN}(Press any key to continue.){Fore.RESET}")
+                input(f"{Fore.CYAN}(Press any key to continue.){Fore.RESET}")
+            else:
+                print(f"{Fore.RED}An error occurred while checking package '{app_name}'.{Fore.RESET}")
+                return 1
+            # Remove old app directory
+            shutil.rmtree(app_dir)
+        # Copy app files to app directory
         shutil.copytree(temp_path, app_dir)
         # Install dependencies
         try:
@@ -119,10 +125,13 @@ def install(working_path, pkg_path):
                 else:
                     print(f"{Fore.CYAN}Installing dependencies...{Fore.RESET}")
                     try:
+                        req_index = 1
                         for req in req_list:
                             req = req.strip().replace(" ", "")
                             if req:  # 确保 req 不是空字符串
+                                print(f"{Fore.CYAN}Installing Module {req_index}: {Fore.YELLOW}{req}{Fore.CYAN}...{Fore.RESET}")
                                 subprocess.run([sys.executable, "-m", "pip", "install", req], check=True)
+                                req_index += 1
                         print(f"{Fore.GREEN}Dependencies installed successfully.{Fore.RESET}")
                     except subprocess.CalledProcessError as e:
                         print(f"{Fore.RED}An error occurred while installing dependencies: {e}{Fore.RESET}")
@@ -264,45 +273,83 @@ def search(keyword):
         return 1
 
 def get(app_name, app_version):
+    # 获取软件源URL
     try:
         with open(os.path.join("data", "config", "config.json"), "r") as config_f:
             config_json = json.load(config_f)
             repo_url = config_json["biscuit_repo"]
-        repo_app_list = requests.get(f"{repo_url}/apps.json").json()
-        if app_name in repo_app_list:
-            app_category = repo_app_list[app_name]["category"]
-        else:
-            print(f"{Fore.RED}Invalid package name.{Fore.RESET}")
-            return 1
-        app_cg_url = f"{repo_url}/{app_category}/"
-        app_pkg_info_response = requests.get(f"{app_cg_url}/package.json")
-        app_pkg_info = app_pkg_info_response.json()
-        if app_version == None:
-            app_ver = app_pkg_info[app_name]["latest_version"]
-        else:
-            if app_version in app_pkg_info[app_name]["version"]:
-                app_ver = str(app_version)
-            else:
-                print(f"{Fore.RED}Invalid package version. You can choose latest version: {app_pkg_info[app_name]['latest_version']}.{Fore.RESET}")
-                return 1
-        app_url = f"{app_cg_url}/{app_name}/{app_name + '_' + app_ver + '.qap'}"
-        response = requests.get(app_url)
-        if response.status_code == 200:
-            down_path = os.path.join("data", "temp", "biscuit")
-            os.makedirs(down_path, exist_ok=True)
-            down_file = os.path.join(down_path, app_name + "_" + app_ver + ".qap")
-            with open(down_file, "wb") as app_pkg_f:
-                app_pkg_f.write(response.content)
-            print(f"{Fore.GREEN}Package '{app_name}' downloaded successfully.{Fore.RESET}")
-        else:
-            print(f"{Fore.RED}Failed to download package '{app_name}'.{Fore.RESET}")
-            return 1
-        install(qos_path, os.path.join("data", "temp", "biscuit", app_name + "_" + app_ver + ".qap"))
     except FileNotFoundError:
         print(f"{Fore.RED}File 'config.json' not found.{Fore.RESET}")
         return 1
     except Exception as e:
         print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
+        return 1
+    # 查找软件包信息
+    try:
+        response = requests.get(f"{repo_url}/apps.json", timeout=10)
+        response.raise_for_status()
+        repo_app_list = response.json()
+    except requests.exceptions.Timeout:
+        print(f"{Fore.RED}The request to get request timed out.{Fore.RESET}")
+        return 1
+    except requests.exceptions.HTTPError:
+        print(f"{Fore.RED}HTTP error occurred while fetching apps.json.{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred while fetching apps.json: {e}{Fore.RESET}")
+        return 1
+    if app_name in repo_app_list:
+        app_category = repo_app_list[app_name]["category"]
+    else:
+        print(f"{Fore.RED}Invalid package name.{Fore.RESET}")
+        return 1
+    # 获取软件包信息
+    app_cg_url = f"{repo_url}/{app_category}/"
+    try:
+        response = requests.get(f"{app_cg_url}/package.json", timeout=10)
+        response.raise_for_status()
+        app_pkg_info = response.json()
+    except requests.exceptions.Timeout:
+        print(f"{Fore.RED}The request to get package.json timed out.{Fore.RESET}")
+        return 1
+    except requests.exceptions.HTTPError:
+        print(f"{Fore.RED}HTTP error occurred while fetching package.json.{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred while fetching package.json: {e}{Fore.RESET}")
+        return 1
+    if app_version is None:
+        app_ver = app_pkg_info[app_name]["latest_version"]
+    else:
+        if app_version in app_pkg_info[app_name]["version"]:
+            app_ver = str(app_version)
+        else:
+            print(f"{Fore.RED}Invalid package version. You can choose latest version: {app_pkg_info[app_name]['latest_version']}.{Fore.RESET}")
+            return 1
+    # 下载qap软件包
+    app_url = f"{app_cg_url}/{app_name}/{app_name + '_' + app_ver + '.qap'}"
+    try:
+        start_time = time.time()
+        print(f"{Fore.CYAN}Downloading package '{app_name}'...{Fore.RESET}")
+        response = requests.get(app_url, timeout=10, stream=True)
+        response.raise_for_status()
+        down_path = os.path.join("data", "temp", "biscuit")
+        os.makedirs(down_path, exist_ok=True)
+        down_file = os.path.join(down_path, app_name + "_" + app_ver + ".qap")
+        with open(down_file, "wb") as app_pkg_f:
+            for chunk in response.iter_content(chunk_size=8192):
+                app_pkg_f.write(chunk)
+        end_time = time.time()
+        print(f"{Fore.GREEN}Package '{app_name}' downloaded successfully in {end_time - start_time:.2f} seconds.{Fore.RESET}")
+        install(qos_path, down_file)
+    except requests.exceptions.Timeout:
+        print(f"{Fore.RED}The request to download package timed out.{Fore.RESET}")
+        return 1
+    except requests.exceptions.HTTPError:
+        print(f"{Fore.RED}HTTP error occurred while downloading package.{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred while downloading package: {e}{Fore.RESET}")
         return 1
     
 def mirror(repo_url):
