@@ -113,3 +113,4 @@ class OOBE:
             json.dump(old_config, new_config_file, indent=4)
         time.sleep(1)
         cmds.clear()
+        return 1

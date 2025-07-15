@@ -27,7 +27,8 @@
         "rm": "Remove a file or directory",
         "activate": "Activate Quarter OS by using Activate Code",
         "ping": "Check the network connection to a host",
-        "down": "Download a file from the internet"
+        "down": "Download a file from the internet",
+        "backup": "Backup Quarter OS Datas"
     },
     "SystemKit": {
         "settings": "Open the system settings"

@@ -12,6 +12,7 @@ devtool/temp/
 # QOS Data Dir
 QOS/data/
 QOS/home/
+QOS/backup/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

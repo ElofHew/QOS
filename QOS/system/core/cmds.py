@@ -55,12 +55,14 @@ def args_tips(command):
         print(f"{Fore.YELLOW}Usage: ping <host>{Style.RESET_ALL}")
     elif command == "down":
         print(f"{Fore.YELLOW}Usage: down <url>{Style.RESET_ALL}")
+    elif command == "backup":
+        print(f"{Fore.YELLOW}Usage: backup <-c/-r/-l>{Style.RESET_ALL}")
     else:
         print(f"{Fore.RED}Error: Unknown command '{command}'.{Style.RESET_ALL}")
 
 # Check Args from user input
 def check_args(command, args):
-    if command in ("cat", "echo", "ls", "cd", "touch", "edit", "mkdir", "rm", "activate", "ping", "down"):
+    if command in ("cat", "echo", "ls", "cd", "touch", "edit", "mkdir", "rm", "activate", "ping", "down", "backup"):
         if len(args) == 1:
             return True
         else:
@@ -75,6 +77,8 @@ def check_args(command, args):
 
 # Need Args
 def cat(work_dir, file_path):
+    """Show the contents of a file."""
+    __usage__ = "Usage: cat <file_path>"
     try:
         if not os.path.exists(os.path.join(work_dir, file_path)):
             print(f"{Fore.RED}Error: File '{file_path}' does not exist.{Style.RESET_ALL}")
@@ -95,9 +99,13 @@ def cat(work_dir, file_path):
         return
 
 def echo(work_dir, text):
+    """Display a message on the console."""
+    __usage__ = "Usage: echo <text>"
     print(text)
 
 def cp(work_dir, src, dst):
+    """Copy a file or directory."""
+    __usage__ = "Usage: cp <source_path> <destination_path>"
     if not os.path.exists(os.path.join(work_dir, src)):
         print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
         return
@@ -110,6 +118,8 @@ def cp(work_dir, src, dst):
         print(f"{Fore.RED}Error: Failed to copy file. {e}{Style.RESET_ALL}")
 
 def mv(work_dir, src, dst):
+    """Move a file or directory."""
+    __usage__ = "Usage: mv <source_path> <destination_path>"
     if not os.path.exists(os.path.join(work_dir, src)):
         print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
         return
@@ -122,6 +132,8 @@ def mv(work_dir, src, dst):
         print(f"{Fore.RED}Error: Failed to move file. {e}{Style.RESET_ALL}")
 
 def ls(work_dir, list_path):
+    """Show the list of files and directories in a directory."""
+    __usage__ = "Usage: ls <directory_path>"
     if list_path == ".":
         list_dir = work_dir
     else:
@@ -148,6 +160,8 @@ def ls(work_dir, list_path):
         print(f"{Fore.RED}Error: Failed to list directory. {e}{Style.RESET_ALL}")
 
 def cd(work_dir, change_dir):
+    """Change the current directory."""
+    __usage__ = "Usage: cd <directory_path>"
     try:
         # 处理当前目录
         if change_dir in (".", '"."'):
@@ -198,6 +212,8 @@ def cd(work_dir, change_dir):
         return work_dir
 
 def touch(work_dir, file_path):
+    """Create a new file."""
+    __usage__ = "Usage: touch <file_path>"
     try:
         if os.path.exists(os.path.join(work_dir, file_path)):
             print(f"{Fore.YELLOW}Warning: File '{file_path}' already exists.{Style.RESET_ALL}")
@@ -209,6 +225,8 @@ def touch(work_dir, file_path):
         print(f"{Fore.RED}Error: Failed to create file. {e}{Style.RESET_ALL}")
 
 def edit(work_dir, file_path):
+    """Edit a file."""
+    __usage__ = "Usage: edit <file_path>"
     try:
         if not os.path.exists(os.path.join(work_dir, file_path)):
             print(f"{Fore.RED}Error: File '{file_path}' does not exist.{Style.RESET_ALL}")
@@ -226,6 +244,8 @@ def edit(work_dir, file_path):
         print(f"{Fore.RED}Error: Failed to open file. {e}{Style.RESET_ALL}")
 
 def mkdir(work_dir, new_dir):
+    """Create a new directory."""
+    __usage__ = "Usage: mkdir <directory_path>"
     try:
         if os.path.exists(os.path.join(work_dir, new_dir)):
             print(f"{Fore.YELLOW}Warning: Path '{work_dir}' already exists.{Style.RESET_ALL}")
@@ -236,6 +256,8 @@ def mkdir(work_dir, new_dir):
         print(f"{Fore.RED}Error: Failed to create directory. {e}{Style.RESET_ALL}")
 
 def rename(work_dir, src, dst):
+    """Rename a file or directory."""
+    __usage__ = "Usage: rename <old_name> <new_name>"
     try:
         if not os.path.exists(os.path.join(work_dir, src)):
             print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
@@ -248,6 +270,8 @@ def rename(work_dir, src, dst):
         print(f"{Fore.RED}Error: Failed to rename file. {e}{Style.RESET_ALL}")
 
 def rm(work_dir, rm_path):
+    """Remove a file or directory."""
+    __usage__ = "Usage: rm <file_path>"
     try:
         if not os.path.exists(os.path.join(work_dir, rm_path)):
             print(f"{Fore.RED}Error: Path '{rm_path}' does not exist.{Style.RESET_ALL}")
@@ -262,6 +286,8 @@ def rm(work_dir, rm_path):
         print(f"{Fore.RED}Error: Failed to remove file or directory. {e}{Style.RESET_ALL}")
 
 def activate(work_dir, code):
+    """Activate Quarter OS by using Activate Code."""
+    __usage__ = "Usage: activate <activate_code>"
     with open("data/config/config.json", "r") as config_file:
         config = json.load(config_file)
     activate_code = config["activate_code"]
@@ -343,6 +369,8 @@ def activate(work_dir, code):
     return True
 
 def ping(working_dir, host):
+    """Check the network connection to a host."""
+    __usage__ = "Usage: ping <host>"
     try:
         if os_type == "windows":
             ping_result = subprocess.run(["ping", "-n", "4", host])
@@ -361,6 +389,8 @@ def ping(working_dir, host):
         return
 
 def down(working_dir, url):
+    """Download a file from the internet."""
+    __usage__ = "Usage: down <url>"
     try:
         response = requests.get(url, stream=True)
         if response.status_code == 200:
@@ -380,6 +410,92 @@ def down(working_dir, url):
             print(f"{Fore.RED}Download file failed. Code: {response.status_code}{Fore.RESET}")
     except Exception as e:
         print(f"{Fore.RED}Download file failed. Error: {e}{Fore.RESET}")
+
+def backup(working_dir, arg):
+    """Backup Quarter OS Datas"""
+    __usage__ = "Usage: backup <-c/-r/-l>"
+    bpath = os.path.join(qos_path, "backup")
+    if arg == "-l":
+        try:
+            # 列出所有备份
+            if not os.path.exists(bpath):
+                print(f"{Fore.YELLOW}(You have no backup yet.){Style.RESET_ALL}")
+                return
+            os.listdir(bpath)
+            for file in os.listdir(bpath):
+                if file.startswith("QOS_") and file.endswith(".zip"):
+                    print(f"{Fore.CYAN}{file}{Style.RESET_ALL}")
+            return
+        except OSError:
+            print(f"{Fore.RED}Error: Failed to list backup files.{Style.RESET_ALL}")
+            return
+    elif arg == "-c":
+        # 创建新的备份
+        pass
+    else:
+        print(f"{Fore.RED}Invalid argument. Please enter '-c' or '-l'.{Style.RESET_ALL}")
+        return
+    while True:
+        try:
+            confirm = input(f"{Fore.CYAN}Are you sure to backup? (y/n): {Fore.RESET}")
+            if confirm.lower() == "y":
+                break
+            elif confirm.lower() == "n":
+                return
+            else:
+                print(f"{Fore.RED}Invalid input. Please enter 'y' or 'n'.{Style.RESET_ALL}")
+        except KeyboardInterrupt:
+            print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
+            return
+    print(f"{Fore.YELLOW}Creating backup...{Fore.RESET}")
+    try:
+        if not os.path.exists(bpath):
+            os.makedirs(bpath)
+    except OSError:
+        print(f"{Fore.RED}Error: Failed to create backup directory.{Style.RESET_ALL}")
+        return
+    try:
+        import zipfile
+        backup_file = os.path.join(bpath, f"QOS_{qos_version}_Backup_{tm.strftime('%Y-%m-%d_%H-%M-%S', tm.localtime())}.zip")
+        with zipfile.ZipFile(backup_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            # 压缩 qos_path 下的 data 文件夹
+            data_folder = os.path.join(qos_path, 'data')
+            if os.path.exists(data_folder):
+                for foldername, subfolders, filenames in os.walk(data_folder):
+                    # 跳过备份目录
+                    if bpath in foldername:
+                        continue
+                    for filename in filenames:
+                        file_path = os.path.join(foldername, filename)
+                        # 计算文件在压缩包中的相对路径
+                        arcname = os.path.relpath(file_path, start=qos_path)
+                        zipf.write(file_path, arcname=arcname)
+            else:
+                print(f"{Fore.YELLOW}Warning: 'data' folder does not exist under qos_path.{Style.RESET_ALL}")
+            # 压缩 qos_path 下的 home 文件夹
+            home_folder = os.path.join(qos_path, 'home')
+            if os.path.exists(home_folder):
+                for foldername, subfolders, filenames in os.walk(home_folder):
+                    # 跳过备份目录
+                    if bpath in foldername:
+                        continue
+                    for filename in filenames:
+                        file_path = os.path.join(foldername, filename)
+                        # 计算文件在压缩包中的相对路径
+                        arcname = os.path.relpath(file_path, start=qos_path)
+                        zipf.write(file_path, arcname=arcname)
+            else:
+                print(f"{Fore.YELLOW}Warning: 'home' folder does not exist under qos_path.{Style.RESET_ALL}")
+        print(f"{Fore.LIGHTGREEN_EX}Backup created successfully: {Fore.LIGHTBLUE_EX}{pathlib.Path(backup_file)}{Style.RESET_ALL}")
+    except KeyboardInterrupt:
+        print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
+        return
+    except ImportError:
+        print(f"{Fore.RED}Error: Failed to import 'zipfile' module. Please install it first.{Style.RESET_ALL}")
+        return
+    except Exception as e:
+        print(f"{Fore.RED}Error: Failed to create backup file. {str(e)}{Style.RESET_ALL}")
+        return
 
 # No Args
 def pwd(work_dir):

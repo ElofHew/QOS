@@ -81,6 +81,8 @@ def main(username):
     default_path = os.path.join(home_path, username)
     # Initialize working directory
     working_path = default_path
+    # Initialize user directory
+    user_path = os.path.join(home_path, username)
     # Get ADs
     get_ads()
     # Start shell loop

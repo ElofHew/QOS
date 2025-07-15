@@ -342,6 +342,7 @@ def get(app_name, app_version):
         end_time = time.time()
         print(f"{Fore.GREEN}Package '{app_name}' downloaded successfully in {end_time - start_time:.2f} seconds.{Fore.RESET}")
         install(qos_path, down_file)
+        os.remove(down_file)
     except requests.exceptions.Timeout:
         print(f"{Fore.RED}The request to download package timed out.{Fore.RESET}")
         return 1

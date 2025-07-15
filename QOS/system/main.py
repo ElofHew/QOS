@@ -8,22 +8,16 @@
 @ Description: A Professional Fake-OS Powered by Python3.
 """
 
-import os
-import sys
-import time
-import json
-import platform
-import pathlib
-from colorama import Fore, Style, init
-import system.core.cmds as cmds
-import system.core.login as login
-import system.core.options as options
-
-# Initialize Colorama （初始化colorama模块）
-init(autoreset=True)
-
-# Clear Console Screen （清屏）
-options.clear()
+try:
+    # Import Required Modules （导入所需模块）
+    import os
+    import sys
+    import json
+    import pathlib
+    from colorama import Fore, Style, init
+except ImportError as e:
+    print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+    sys.exit(0)
 
 # Boot Check （启动检查）:
 try:
@@ -39,6 +33,21 @@ try:
 except Exception as e:
     print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
     sys.exit(0)
+
+try:
+    # Initialize QOS Modules （初始化QOS模块）
+    import system.core.cmds as cmds
+    import system.core.options as options
+except Exception as e:
+    print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+    sys.exit(0)
+
+# Initialize Colorama （初始化colorama模块）
+init(autoreset=True)
+
+# Clear Console Screen （清屏）
+options.clear()
+
 
 # Load Config Files （加载配置文件）
 with open("data/config/config.json", "r") as qos_config_file:
@@ -63,25 +72,24 @@ def main():
         options.get_ads()
         if oobe_condition:
             import system.opts.oobe as oobe
-            oobe.OOBE().main()
+            retrun_code = oobe.OOBE().main()
             del oobe
-        else:
-            import system.opts.loginman as loginman
-            username = loginman.main(version, startup_title)
-            del loginman
-            if username:
-                qoscore.check_home_dir()
-                cmds.clear()
-                import system.opts.komshell as komshell
-                shell_statu = komshell.main(username)
-                if shell_statu == 0:
-                    return 0
-                elif shell_statu == 1:
-                    return 1
-                else:
-                    return False
+        import system.opts.loginman as loginman
+        username = loginman.main(version, startup_title)
+        del loginman
+        if username:
+            qoscore.check_home_dir()
+            cmds.clear()
+            import system.opts.komshell as komshell
+            shell_statu = komshell.main(username)
+            if shell_statu == 0:
+                return 0
+            elif shell_statu == 1:
+                return 1
             else:
-                sys.exit(0)
+                return False
+        else:
+            sys.exit(0)
     except FileNotFoundError:
         print(f"{Fore.RED}Error: File not found.{Style.RESET_ALL}")
         sys.exit(0)
