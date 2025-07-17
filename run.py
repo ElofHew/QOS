@@ -11,84 +11,64 @@ import sys
 import platform
 import subprocess
 
-try:
-    if not os.path.exists(os.path.join(os.getcwd(),"QOS","qos.py")) and os.path.exists(os.path.join(os.getcwd(),"QOS","system")):
-        raise FileNotFoundError
-    if not sys.version_info >= (3, 10):
-        raise ValueError
-except FileNotFoundError:
-    print("QOS not found. Please check QOS directory.")
-    sys.exit(1)
-except ValueError:
-    print("Python version must be 3.10 or higher.")
-    sys.exit(1)
-
+# Check system environment (Windows: must be Windows 10 or higher, and using PowerShell; other systems not checked)
 pfs = platform.system().lower()
-
-try:
-    if pfs == 'windows':
-        if platform.release() < '10':
-            raise ValueError
-except ValueError:
-    print("Error: You must be using Windows 10 or higher to run QOS.")
-    sys.exit(1)
+work_path = os.getcwd()
 
 if pfs == 'windows':
     try:
+        if platform.release() < '10':
+            raise ValueError("You must be using Windows 10 or higher to run QOS.")
         if not os.getenv('PSModulePath'):
-            raise ValueError
-    except ValueError:
-        print("Error: You must be using PowerShell to run QOS.")
+            raise IndexError("You must be using PowerShell to run QOS.")
+    except (ValueError, IndexError) as e:
+        print(f"Error: {e}")
         sys.exit(1)
 
-def activate_venv():
+# Check environment (repository exists, Python version is 3.10 or higher)
+try:
+    if not os.path.exists(os.path.join(work_path, "QOS", "qos.py")):
+        raise FileNotFoundError("QOS not found. Please check QOS directory.")
+    if not sys.version_info >= (3, 10):
+        raise ValueError("Python version must be 3.10 or higher.")
+except (FileNotFoundError, ValueError) as e:
+    print(f"Error: {e}")
+    sys.exit(1)
+
+# Create/check virtual environment
+venv_path = os.path.join(work_path, "qosvenv", "Scripts" if pfs == 'windows' else "bin")
+
+try:
     if not os.path.exists('qosvenv'):
         print("Making virtual environment...")
-        os.system('python -m venv qosvenv')
-    print("Activating Environment...")
-    if pfs == 'windows':
-        try:
-            subprocess.run(['powershell', '-ExecutionPolicy', 'RemoteSigned', '.\\qosvenv\\Scripts\\activate.ps1'], check=True)
-        except subprocess.CalledProcessError:
-            print("Error: Could not activate virtual environment.")
-            sys.exit(1)
-    else:
-        os.system('source ./qosvenv/bin/activate')
+        subprocess.check_call(["python" if pfs == 'windows' else "python3", "-m", "venv", "qosvenv"])
+    print("Found virtual environment.")
+except FileNotFoundError:
+    print("Error: Virtual environment not found. Please check QOS directory.")
+    sys.exit(1)
 
-def ins_req():
+# Check/install requirements
+try:
     print("Checking and installing requirements...")
-    with open('requirements.txt') as f:
-        required = f.read().splitlines()
-    for package in required:
-        # 检查模块是否已经安装
-        try:
-            subprocess.check_call([sys.executable, '-m', 'pip', 'show', package])
-            print(f"{package} is already installed.")
-        except subprocess.CalledProcessError:
-            # 如果模块未安装，则进行安装
-            print(f"Installing {package}...")
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
-    print("QOS is ready to use.")
+    subprocess.check_call([os.path.join(venv_path, 'python.exe' if pfs == 'windows' else 'python'), '-m', 'pip', 'install', '-r', os.path.join(work_path, 'requirements.txt')])
+    print("Requirements installed.")
+except Exception as e:
+    print("Error: Failed to install requirements. Please check your internet connection or try again later.")
+    print(e)
+    sys.exit(1)
 
-def make_path():
-    old_path = os.getcwd()
-    new_path = os.path.join(old_path, "QOS")
-    os.chdir(new_path)
+print("=============================")
+print(" Quarter OS is ready to use. ")
+print("=============================")
 
-def run_qos():
-    if pfs == 'windows':
-        os.system('python qos.py')
-    else:
-        os.system('python3 qos.py')
+# Run QOS.py
+try:
+    os.chdir(os.path.join(work_path, "QOS"))
+    subprocess.check_call([os.path.join(venv_path, 'python.exe' if pfs == 'windows' else 'python'), 'qos.py'])
+except FileNotFoundError as e:
+    print("Error: QOS.py not found. Please check QOS directory.")
+    sys.exit(1)
+finally:
+    os.chdir(work_path)
 
-def main():
-    activate_venv()
-    ins_req()
-    make_path()
-    try:
-        run_qos()
-    except KeyboardInterrupt:
-        pass
-
-if __name__ == '__main__':
-    main()
+# End of run.py

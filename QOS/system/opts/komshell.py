@@ -127,14 +127,14 @@ def main(username):
                         if args == []:
                             working_path = cmds.cd(working_path, [])
                         else:
-                            working_path = cmds.cd(working_path, *args)
+                            working_path = cmds.cd(working_path, args)
                     else:
                         if args == []:
                             run_cmd = getattr(cmds, command)
                             run_cmd(working_path, [])
                         else:
                             run_cmd = getattr(cmds, command)
-                            run_cmd(working_path, *args)
+                            run_cmd(working_path, args)
                 case [command] if command in supported_cmds["SystemKit"]:
                     if command == "settings":
                         import system.opts.settings as settings

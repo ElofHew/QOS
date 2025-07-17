@@ -59,7 +59,11 @@ def echo(work_dir, args):
         print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
         return
     text = " ".join(args)
-    print(text)
+    try:
+        print(text)
+    except Exception as e:
+        print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+        return
 
 def cp(work_dir, args):
     """Copy a file or directory."""
@@ -72,16 +76,44 @@ def cp(work_dir, args):
         return
     src = args[0]
     dst = args[1]
-    if not os.path.exists(os.path.join(work_dir, src)):
-        print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
-        return
-    if os.path.exists(os.path.join(work_dir, dst)):
-        print(f"{Fore.YELLOW}Warning: Destination path '{dst}' already exists. It will be overwritten.{Style.RESET_ALL}")
+    src_path = os.path.join(work_dir, src)
+    dst_path = os.path.join(work_dir, dst)
     try:
-        shutil.copy(os.path.join(work_dir, src), os.path.join(work_dir, dst))
-        print(f"{Fore.GREEN}File copied successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
-    except IOError as e:
-        print(f"{Fore.RED}Error: Failed to copy file. {e}{Style.RESET_ALL}")
+        if not os.path.exists(src_path):
+            print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
+            return
+        # Check if both file and directory exist
+        if os.path.isfile(src_path) and os.path.isdir(src_path):
+            while True:
+                choice = input(f"Both a file and a directory named '{src}' exist. Copy the file (f) or the directory (d)? ").strip().lower()
+                if choice == 'f':
+                    shutil.copy(os.path.join(work_dir, src), os.path.join(work_dir, dst))
+                    print(f"{Fore.GREEN}File copied successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
+                    break
+                elif choice == 'd':
+                    shutil.copytree(os.path.join(work_dir, src), os.path.join(work_dir, dst))
+                    print(f"{Fore.GREEN}Directory copied successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
+                    break
+                else:
+                    print(f"{Fore.RED}Error: Invalid choice. Please choose 'f' for file or 'd' for directory.{Style.RESET_ALL}")
+                    continue
+        elif os.path.isfile(src_path):
+            shutil.copy(src_path, dst_path)
+            print(f"{Fore.GREEN}File copied successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
+        elif os.path.isdir(src_path):
+            shutil.copytree(src_path, dst_path)
+            print(f"{Fore.GREEN}Directory copied successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}Error: Source path '{src}' is neither a file nor a directory.{Style.RESET_ALL}")
+            return
+        if os.path.exists(dst_path):
+            print(f"{Fore.YELLOW}Warning: Destination path '{dst}' already exists. It will be overwritten.{Style.RESET_ALL}")
+    except KeyboardInterrupt:
+        print(f"{Fore.RED}Error: Operation cancelled by user.{Style.RESET_ALL}")
+        return
+    except (IOError, OSError) as e:
+        print(f"{Fore.RED}Error: Failed to copy file or directory. {e}{Style.RESET_ALL}")
+        return
 
 def mv(work_dir, args):
     """Move a file or directory."""
@@ -94,16 +126,41 @@ def mv(work_dir, args):
         return
     src = args[0]
     dst = args[1]
-    if not os.path.exists(os.path.join(work_dir, src)):
-        print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
-        return
-    if os.path.exists(os.path.join(work_dir, dst)):
-        print(f"{Fore.YELLOW}Warning: Destination path '{dst}' already exists. It will be overwritten.{Style.RESET_ALL}")
+    src_file_path = os.path.join(work_dir, src)
+    src_dir_path = os.path.join(work_dir, src)
+    dst_path = os.path.join(work_dir, dst)
     try:
-        shutil.move(os.path.join(work_dir, src), os.path.join(work_dir, dst))
-        print(f"{Fore.GREEN}File moved successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
-    except IOError as e:
-        print(f"{Fore.RED}Error: Failed to move file. {e}{Style.RESET_ALL}")
+        if not os.path.exists(src_file_path) and not os.path.exists(src_dir_path):
+            print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
+            return
+        if os.path.exists(src_file_path) and os.path.exists(src_dir_path):
+            while True:
+                choice = input(f"{Fore.YELLOW}Warning: '{src}' exists both as a file and a directory. Please specify to move the file or directory (enter 'f' for file, 'd' for directory): {Style.RESET_ALL}")
+                if choice == 'f':
+                    src_path = src_file_path
+                    break
+                elif choice == 'd':
+                    src_path = src_dir_path
+                    break
+                else:
+                    print(f"{Fore.RED}Error: Invalid choice.{Style.RESET_ALL}")
+                    continue
+        elif os.path.isfile(src_file_path):
+            src_path = src_file_path
+        else:
+            src_path = src_dir_path
+        if os.path.isfile(src_path) and os.path.exists(dst_path) and os.path.isfile(dst_path):
+            print(f"{Fore.YELLOW}Warning: Destination path '{dst}' already exists as a file. It will be overwritten.{Style.RESET_ALL}")
+        elif os.path.isdir(src_path) and os.path.exists(dst_path) and os.path.isdir(dst_path):
+            print(f"{Fore.YELLOW}Warning: Destination path '{dst}' already exists as a directory. It will be overwritten.{Style.RESET_ALL}")
+        shutil.move(src_path, dst_path)
+        print(f"{Fore.GREEN}File or directory moved successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
+    except KeyboardInterrupt:
+        print(f"{Fore.RED}Error: Operation cancelled by user.{Style.RESET_ALL}")
+        return
+    except (IOError, OSError) as e:
+        print(f"{Fore.RED}Error: Failed to move file or directory. {e}{Style.RESET_ALL}")
+        return
 
 def ls(work_dir, args):
     """Show the list of files and directories in a directory."""
@@ -136,6 +193,7 @@ def ls(work_dir, args):
                     print(f"{Fore.WHITE}{file}{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to list directory. {e}{Style.RESET_ALL}")
+        return
 
 def cd(work_dir, args):
     """Change the current directory."""
@@ -209,6 +267,7 @@ def touch(work_dir, args):
             print(f"{Fore.GREEN}File '{file_path}' created successfully.{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to create file. {e}{Style.RESET_ALL}")
+        return
 
 def edit(work_dir, args):
     """Edit a file."""
@@ -232,6 +291,7 @@ def edit(work_dir, args):
                 print(f"{Fore.RED}Error: Unsupported OS.{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to open file. {e}{Style.RESET_ALL}")
+        return
 
 def mkdir(work_dir, args):
     """Create a new directory."""
@@ -248,6 +308,7 @@ def mkdir(work_dir, args):
             print(f"{Fore.GREEN}Directory '{new_dir}' created successfully.{Style.RESET_ALL}")
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to create directory. {e}{Style.RESET_ALL}")
+        return
 
 def rename(work_dir, args):
     """Rename a file or directory."""
@@ -260,16 +321,42 @@ def rename(work_dir, args):
         return
     src = args[0]
     dst = args[1]
+    src_path = os.path.join(work_dir, src)
+    dst_path = os.path.join(work_dir, dst)
     try:
-        if not os.path.exists(os.path.join(work_dir, src)):
+        if not os.path.exists(src_path):
             print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
             return
-        if os.path.exists(os.path.join(work_dir, dst)):
+        # Check if both file and directory exist
+        if os.path.isfile(src_path) and os.path.isdir(src_path):
+            while True:
+                choice = input(f"Both a file and a directory named '{src}' exist. Rename the file (f) or the directory (d)? ").strip().lower()
+                if choice == 'f':
+                    src_path = os.path.join(work_dir, src)
+                    break
+                elif choice == 'd':
+                    src_path = os.path.join(work_dir, src)
+                    break
+                else:
+                    print(f"{Fore.RED}Error: Invalid choice. Please choose 'f' for file or 'd' for directory.{Style.RESET_ALL}")
+                    continue
+        elif os.path.isfile(src_path):
+            pass  # src_path is already correctly set to the file path
+        elif os.path.isdir(src_path):
+            pass  # src_path is already correctly set to the directory path
+        else:
+            print(f"{Fore.RED}Error: Source path '{src}' is neither a file nor a directory.{Style.RESET_ALL}")
+            return
+        if os.path.exists(dst_path):
             print(f"{Fore.YELLOW}Warning: Destination path '{dst}' already exists. It will be overwritten.{Style.RESET_ALL}")
-        os.rename(os.path.join(work_dir, src), os.path.join(work_dir, dst))
-        print(f"{Fore.GREEN}File renamed successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
-    except OSError as e:
-        print(f"{Fore.RED}Error: Failed to rename file. {e}{Style.RESET_ALL}")
+        os.rename(src_path, dst_path)
+        print(f"{Fore.GREEN}File or directory renamed successfully from '{src}' to '{dst}'.{Style.RESET_ALL}")
+    except KeyboardInterrupt:
+        print(f"{Fore.RED}Error: Operation cancelled by user.{Style.RESET_ALL}")
+        return
+    except (IOError, OSError) as e:
+        print(f"{Fore.RED}Error: Failed to rename file or directory. {e}{Style.RESET_ALL}")
+        return
 
 def rm(work_dir, args):
     """Remove a file or directory."""
@@ -278,18 +365,42 @@ def rm(work_dir, args):
         print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
         return
     rm_path = args[0]
+    rm_full_path = os.path.join(work_dir, rm_path)
     try:
-        if not os.path.exists(os.path.join(work_dir, rm_path)):
+        if not os.path.exists(rm_full_path):
             print(f"{Fore.RED}Error: Path '{rm_path}' does not exist.{Style.RESET_ALL}")
             return
-        if os.path.isfile(os.path.join(work_dir, rm_path)):
-            os.remove(os.path.join(work_dir, rm_path))
+        # Check if both file and directory exist
+        if os.path.isfile(rm_full_path) and os.path.isdir(rm_full_path):
+            while True:
+                choice = input(f"Both a file and a directory named '{rm_path}' exist. Remove the file (f) or the directory (d)? ").strip().lower()
+                if choice == 'f':
+                    rm_full_path = os.path.join(work_dir, rm_path)
+                    os.remove(rm_full_path)
+                    print(f"{Fore.GREEN}File '{rm_path}' removed successfully.{Style.RESET_ALL}")
+                    break
+                elif choice == 'd':
+                    rm_full_path = os.path.join(work_dir, rm_path)
+                    shutil.rmtree(rm_full_path)
+                    print(f"{Fore.GREEN}Directory '{rm_path}' removed successfully.{Style.RESET_ALL}")
+                    break
+                else:
+                    print(f"{Fore.RED}Error: Invalid choice. Please choose 'f' for file or 'd' for directory.{Style.RESET_ALL}")
+                    continue
+        elif os.path.isfile(rm_full_path):
+            os.remove(rm_full_path)
             print(f"{Fore.GREEN}File '{rm_path}' removed successfully.{Style.RESET_ALL}")
-        elif os.path.isdir(os.path.join(work_dir, rm_path)):
-            shutil.rmtree(os.path.join(work_dir, rm_path))
+        elif os.path.isdir(rm_full_path):
+            shutil.rmtree(rm_full_path)
             print(f"{Fore.GREEN}Directory '{rm_path}' removed successfully.{Style.RESET_ALL}")
-    except OSError as e:
+        else:
+            print(f"{Fore.RED}Error: Path '{rm_path}' is neither a file nor a directory.{Style.RESET_ALL}")
+    except KeyboardInterrupt:
+        print(f"{Fore.RED}Error: Operation cancelled by user.{Style.RESET_ALL}")
+        return
+    except (IOError, OSError) as e:
         print(f"{Fore.RED}Error: Failed to remove file or directory. {e}{Style.RESET_ALL}")
+        return
 
 def activate(work_dir, args):
     """Activate Quarter OS by using Activate Code."""
@@ -426,8 +537,15 @@ def down(working_dir, args):
             print(f"{Fore.CYAN}Path: {file_path}{Fore.RESET}")
         else:
             print(f"{Fore.RED}Download file failed. Code: {response.status_code}{Fore.RESET}")
+    except KeyboardInterrupt:
+        print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
+        return
+    except requests.exceptions.RequestException as e:
+        print(f"{Fore.RED}Error: Failed to download file. {e}{Style.RESET_ALL}")
+        return
     except Exception as e:
         print(f"{Fore.RED}Download file failed. Error: {e}{Fore.RESET}")
+        return
 
 def backup(working_dir, args):
     """Backup Quarter OS Datas"""
@@ -605,12 +723,10 @@ def sysinfo():
     print(f"{Fore.LIGHTYELLOW_EX}QOS Path: {Fore.CYAN}{qos_path}{Style.RESET_ALL}")
 
 def clear():
-    with open("data/config/config.json", "r") as config_file:
-        config = json.load(config_file)
-        os_type = config["os_type"]
-    if os_type == "windows":
+    pfs = platform.system().lower()
+    if pfs == "windows":
         os.system("cls")
-    elif os_type == "linux":
+    elif pfs == "linux" or pfs == "darwin":
         os.system("clear")
     else:
         print(f"{Fore.RED}Error: Unsupported OS.{Style.RESET_ALL}")
