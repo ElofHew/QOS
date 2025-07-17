@@ -5,7 +5,7 @@ import json
 from colorama import init as cinit
 from colorama import Fore, Style, Back
 
-import system.core.options as options
+import system.core.features as features
 import system.core.qoscore as qoscore
 import system.core.login as login
 import system.core.cmds as cmds
@@ -30,8 +30,8 @@ class OOBE:
             if code == "pass":
                 print(f"{Fore.LIGHTGREEN_EX}Skip activation, Please activate QOS later.{Style.RESET_ALL}")
                 break
-            activate_condition = cmds.activate(None, code)
-            if activate_condition:
+            activate_condition = cmds.activate(None, [code])
+            if activate_condition == 1:
                 print(f"\n{Fore.LIGHTGREEN_EX}Congratulations! QOS has been activated successfully!{Style.RESET_ALL}")
                 break
             else:
@@ -39,6 +39,16 @@ class OOBE:
                 time.sleep(1)
                 continue
         input("(Press any key to continue.)")
+
+    # Create System Name
+    def create_system_name(self):
+        print(f"{Fore.LIGHTGREEN_EX}Please enter a system name.{Style.RESET_ALL}")
+        system_name = login.make_system_name()
+        if system_name == 10:
+            print(f"{Fore.RED}Error: Keyboard interrupt detected.{Style.RESET_ALL}")
+            sys.exit(1)
+        if system_name and system_name != 10:
+            print(f"{Fore.LIGHTGREEN_EX}Your system name is {Fore.LIGHTBLUE_EX}{system_name}{Style.RESET_ALL}")
 
     # Add User Account
     def add_user_account(self):
@@ -66,7 +76,7 @@ class OOBE:
     # EULA Module
     def eula(self):
         print(f"{Style.BRIGHT}{Fore.CYAN}Please read the EULA of QOS and accept it to continue.{Style.RESET_ALL}\n")
-        options.cat("system/etc/eula.txt")
+        features.cat("system/etc/eula.txt")
         input("\n(Press any key to continue.)")
         print(f"\n{Style.BRIGHT}{Fore.CYAN}Do you accept the EULA? (y/n){Style.RESET_ALL}")
         while True:
@@ -95,10 +105,13 @@ class OOBE:
         time.sleep(1)
         self.eula()
         cmds.clear()
-        options.jump_print("Welcome to QOS!", Fore.GREEN, Style.BRIGHT)
+        features.jump_print("Welcome to QOS!", Fore.GREEN, Style.BRIGHT)
         time.sleep(1)
         print(Style.BRIGHT + Fore.MAGENTA + "This is the Quarter OS Out-of-Box-Experience (OOBE).\n" + Style.RESET_ALL)
         self.add_user_account()
+        time.sleep(1)
+        cmds.clear()
+        self.create_system_name()
         time.sleep(1)
         cmds.clear()
         self.activate_qos()

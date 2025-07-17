@@ -14,7 +14,7 @@ try:
     from colorama import Fore, Style, Back
     # Core modules
     import system.core.cmds as cmds
-    from system.core.options import get_ads
+    from system.core.features import get_ads
 except ImportError as e:
     print(f"Error: {e}")
     sys.exit(1)
@@ -123,21 +123,18 @@ def main(username):
                         run_cmd = getattr(cmds, command)
                         run_cmd()
                 case [command, *args] if command in supported_cmds["NeedArgs"]:
-                    if args == []:
-                        if command == "ls":
-                            cmds.ls(working_path, ".")
+                    if command == "cd":
+                        if args == []:
+                            working_path = cmds.cd(working_path, [])
                         else:
-                            cmds.args_tips(command)
+                            working_path = cmds.cd(working_path, *args)
                     else:
-                        check_status = cmds.check_args(command, args)
-                        if check_status:
-                            if command == "cd":
-                                working_path = cmds.cd(working_path, args[0])
-                            else:
-                                run_cmd = getattr(cmds, command)
-                                run_cmd(working_path, *args)
+                        if args == []:
+                            run_cmd = getattr(cmds, command)
+                            run_cmd(working_path, [])
                         else:
-                            cmds.args_tips(command)
+                            run_cmd = getattr(cmds, command)
+                            run_cmd(working_path, *args)
                 case [command] if command in supported_cmds["SystemKit"]:
                     if command == "settings":
                         import system.opts.settings as settings
@@ -149,21 +146,10 @@ def main(username):
                     else:
                         cmds.pm_check_args(args, working_path)
                 case [command, *args] if command in supported_cmds["ShizukuCompat"]:
-                    import system.core.shizuku as shizuku
                     if args == []:
-                        shizuku.tips()
+                        cmds.szk_tips()
                     else:
-                        if args[0] == "install":
-                            shizuku.install(working_path, args[1])
-                        elif args[0] == "remove":
-                            shizuku.remove(args[1])
-                        elif args[0] == "list":
-                            shizuku.list()
-                        elif args[0] == "run":
-                            shizuku.run(args[1])
-                        else:
-                            shizuku.tips()
-                    del shizuku
+                        cmds.szk_check_args(args, working_path)
                 case _:
                     if shell_command.strip() == "":
                         continue

@@ -1,9 +1,10 @@
 {
     "os_type": "windows",
-    "version": "Alpha 0.2",
+    "version": "Alpha 0.2.2",
     "qos_path": null,
-    "startup_title": "QOS Alpha 0.2",
+    "startup_title": "QOS Alpha 0.2.2",
     "qos_startup_logo": "1",
+    "system_name": null,
     "oobe": true,
     "biscuit_repo": "https://os.drevan.xyz/biscuit/repo/",
     "qos_edition": null,

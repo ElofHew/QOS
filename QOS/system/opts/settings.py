@@ -32,7 +32,8 @@ def account_settings():
         print(Fore.CYAN + "1 - Add User")
         print(Fore.CYAN + "2 - Remove User")
         print(Fore.CYAN + "3 - Change Password")
-        print(Fore.CYAN + "4 - Back" + Fore.RESET)
+        print(Fore.CYAN + "4 - Change System Name" + Fore.RESET)
+        print(Fore.CYAN + "5 - Back" + Fore.RESET)
         settings2_choice = input("> ")
         if settings2_choice == "1":
             login.add_user()
@@ -44,6 +45,9 @@ def account_settings():
             login.change_password()
             continue
         elif settings2_choice == "4":
+            login.make_system_name()
+            continue
+        elif settings2_choice == "5":
             return
         else:
             print("Invalid choice. Please try again.")

@@ -19,6 +19,10 @@ except ImportError as e:
     print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
     sys.exit(0)
 
+from os import system as oss
+from os import path as osp
+sys.path.insert(0, osp.abspath(osp.join(osp.dirname(__file__), "..")))
+
 # Boot Check （启动检查）:
 try:
     # Initialize QOS Core Modules （初始化QOS核心模块）
@@ -37,7 +41,7 @@ except Exception as e:
 try:
     # Initialize QOS Modules （初始化QOS模块）
     import system.core.cmds as cmds
-    import system.core.options as options
+    import system.core.features as features
 except Exception as e:
     print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
     sys.exit(0)
@@ -46,8 +50,7 @@ except Exception as e:
 init(autoreset=True)
 
 # Clear Console Screen （清屏）
-options.clear()
-
+features.clear()
 
 # Load Config Files （加载配置文件）
 with open("data/config/config.json", "r") as qos_config_file:
@@ -66,10 +69,10 @@ def main():
         qos_version = str(version)
         print(f"{Style.DIM}Quarter Operation System{Style.RESET_ALL}\n")
         print(f"{Fore.MAGENTA}{Style.BRIGHT}Version: {qos_version}{Style.RESET_ALL}\n")
-        options.cat(qos_logo)
-        options.cat(qos_startup)
+        features.cat(qos_logo)
+        features.cat(qos_startup)
         print("")
-        options.get_ads()
+        features.get_ads()
         if oobe_condition:
             import system.opts.oobe as oobe
             retrun_code = oobe.OOBE().main()

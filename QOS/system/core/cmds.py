@@ -11,7 +11,7 @@ from colorama import Fore, Style
 import shutil
 import subprocess
 
-import system.core.options as options
+import system.core.features as features
 
 cinit(autoreset=True)
 
@@ -25,60 +25,14 @@ with open('data/config/config.json', 'r') as config_file:
     data_path = config["data_path"]
     last_login = config["last_login"]
 
-# Tips to use Args
-def args_tips(command):
-    if command == "cat":
-        print(f"{Fore.YELLOW}Usage: cat <file_path>{Style.RESET_ALL}")
-    elif command == "echo":
-        print(f"{Fore.YELLOW}Usage: echo <text>{Style.RESET_ALL}")
-    elif command == "cp":
-        print(f"{Fore.YELLOW}Usage: cp <source_path> <destination_path>{Style.RESET_ALL}")
-    elif command == "mv":
-        print(f"{Fore.YELLOW}Usage: mv <source_path> <destination_path>{Style.RESET_ALL}")
-    elif command == "ls":
-        print(f"{Fore.YELLOW}Usage: ls <directory_path>{Style.RESET_ALL}")
-    elif command == "cd":
-        print(f"{Fore.YELLOW}Usage: cd <directory_path>{Style.RESET_ALL}")
-    elif command == "touch":
-        print(f"{Fore.YELLOW}Usage: touch <file_path>{Style.RESET_ALL}")
-    elif command == "edit":
-        print(f"{Fore.YELLOW}Usage: edit <file_path>{Style.RESET_ALL}")
-    elif command == "mkdir":
-        print(f"{Fore.YELLOW}Usage: mkdir <directory_path>{Style.RESET_ALL}")
-    elif command == "rm":
-        print(f"{Fore.YELLOW}Usage: rm <file_path>{Style.RESET_ALL}")
-    elif command == "rename":
-        print(f"{Fore.YELLOW}Usage: rename <old_name> <new_name>{Style.RESET_ALL}")
-    elif command == "activate":
-        print(f"{Fore.YELLOW}Usage: activate <activate_code>{Style.RESET_ALL}")
-    elif command == "ping":
-        print(f"{Fore.YELLOW}Usage: ping <host>{Style.RESET_ALL}")
-    elif command == "down":
-        print(f"{Fore.YELLOW}Usage: down <url>{Style.RESET_ALL}")
-    elif command == "backup":
-        print(f"{Fore.YELLOW}Usage: backup <-c/-r/-l>{Style.RESET_ALL}")
-    else:
-        print(f"{Fore.RED}Error: Unknown command '{command}'.{Style.RESET_ALL}")
-
-# Check Args from user input
-def check_args(command, args):
-    if command in ("cat", "echo", "ls", "cd", "touch", "edit", "mkdir", "rm", "activate", "ping", "down", "backup"):
-        if len(args) == 1:
-            return True
-        else:
-            return False
-    elif command in ("cp", "mv", "rename"):
-        if len(args) == 2:
-            return True
-        else:
-            return False
-    else:
-        return False
-
 # Need Args
-def cat(work_dir, file_path):
+def cat(work_dir, args):
     """Show the contents of a file."""
     __usage__ = "Usage: cat <file_path>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    file_path = args[0]
     try:
         if not os.path.exists(os.path.join(work_dir, file_path)):
             print(f"{Fore.RED}Error: File '{file_path}' does not exist.{Style.RESET_ALL}")
@@ -98,14 +52,26 @@ def cat(work_dir, file_path):
         print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
         return
 
-def echo(work_dir, text):
+def echo(work_dir, args):
     """Display a message on the console."""
     __usage__ = "Usage: echo <text>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    text = " ".join(args)
     print(text)
 
-def cp(work_dir, src, dst):
+def cp(work_dir, args):
     """Copy a file or directory."""
     __usage__ = "Usage: cp <source_path> <destination_path>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    if len(args) < 2:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    src = args[0]
+    dst = args[1]
     if not os.path.exists(os.path.join(work_dir, src)):
         print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
         return
@@ -117,9 +83,17 @@ def cp(work_dir, src, dst):
     except IOError as e:
         print(f"{Fore.RED}Error: Failed to copy file. {e}{Style.RESET_ALL}")
 
-def mv(work_dir, src, dst):
+def mv(work_dir, args):
     """Move a file or directory."""
     __usage__ = "Usage: mv <source_path> <destination_path>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    if len(args) < 2:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    src = args[0]
+    dst = args[1]
     if not os.path.exists(os.path.join(work_dir, src)):
         print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
         return
@@ -131,9 +105,13 @@ def mv(work_dir, src, dst):
     except IOError as e:
         print(f"{Fore.RED}Error: Failed to move file. {e}{Style.RESET_ALL}")
 
-def ls(work_dir, list_path):
+def ls(work_dir, args):
     """Show the list of files and directories in a directory."""
     __usage__ = "Usage: ls <directory_path>"
+    if len(args) == 0:
+        list_path = "."
+    else:
+        list_path = args[0]
     if list_path == ".":
         list_dir = work_dir
     else:
@@ -159,9 +137,13 @@ def ls(work_dir, list_path):
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to list directory. {e}{Style.RESET_ALL}")
 
-def cd(work_dir, change_dir):
+def cd(work_dir, args):
     """Change the current directory."""
     __usage__ = "Usage: cd <directory_path>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return work_dir
+    change_dir = args[0]
     try:
         # 处理当前目录
         if change_dir in (".", '"."'):
@@ -211,9 +193,13 @@ def cd(work_dir, change_dir):
         print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
         return work_dir
 
-def touch(work_dir, file_path):
+def touch(work_dir, args):
     """Create a new file."""
     __usage__ = "Usage: touch <file_path>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    file_path = args[0]
     try:
         if os.path.exists(os.path.join(work_dir, file_path)):
             print(f"{Fore.YELLOW}Warning: File '{file_path}' already exists.{Style.RESET_ALL}")
@@ -224,9 +210,13 @@ def touch(work_dir, file_path):
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to create file. {e}{Style.RESET_ALL}")
 
-def edit(work_dir, file_path):
+def edit(work_dir, args):
     """Edit a file."""
     __usage__ = "Usage: edit <file_path>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    file_path = args[0]
     try:
         if not os.path.exists(os.path.join(work_dir, file_path)):
             print(f"{Fore.RED}Error: File '{file_path}' does not exist.{Style.RESET_ALL}")
@@ -243,9 +233,13 @@ def edit(work_dir, file_path):
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to open file. {e}{Style.RESET_ALL}")
 
-def mkdir(work_dir, new_dir):
+def mkdir(work_dir, args):
     """Create a new directory."""
     __usage__ = "Usage: mkdir <directory_path>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    new_dir = args[0]
     try:
         if os.path.exists(os.path.join(work_dir, new_dir)):
             print(f"{Fore.YELLOW}Warning: Path '{work_dir}' already exists.{Style.RESET_ALL}")
@@ -255,9 +249,17 @@ def mkdir(work_dir, new_dir):
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to create directory. {e}{Style.RESET_ALL}")
 
-def rename(work_dir, src, dst):
+def rename(work_dir, args):
     """Rename a file or directory."""
     __usage__ = "Usage: rename <old_name> <new_name>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    if len(args) < 2:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    src = args[0]
+    dst = args[1]
     try:
         if not os.path.exists(os.path.join(work_dir, src)):
             print(f"{Fore.RED}Error: Source path '{src}' does not exist.{Style.RESET_ALL}")
@@ -269,9 +271,13 @@ def rename(work_dir, src, dst):
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to rename file. {e}{Style.RESET_ALL}")
 
-def rm(work_dir, rm_path):
+def rm(work_dir, args):
     """Remove a file or directory."""
     __usage__ = "Usage: rm <file_path>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    rm_path = args[0]
     try:
         if not os.path.exists(os.path.join(work_dir, rm_path)):
             print(f"{Fore.RED}Error: Path '{rm_path}' does not exist.{Style.RESET_ALL}")
@@ -285,9 +291,13 @@ def rm(work_dir, rm_path):
     except OSError as e:
         print(f"{Fore.RED}Error: Failed to remove file or directory. {e}{Style.RESET_ALL}")
 
-def activate(work_dir, code):
+def activate(work_dir, args):
     """Activate Quarter OS by using Activate Code."""
     __usage__ = "Usage: activate <activate_code>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    code = args[0]
     with open("data/config/config.json", "r") as config_file:
         config = json.load(config_file)
     activate_code = config["activate_code"]
@@ -366,11 +376,15 @@ def activate(work_dir, code):
     print(f"{Fore.GREEN}Quarter OS activated successfully.{Style.RESET_ALL}")
     print(f"{Fore.CYAN}Your Quarter OS edition is {Fore.LIGHTGREEN_EX}{qos_edition} Edition{Fore.CYAN} and your activate code is {Fore.LIGHTGREEN_EX}{activate_code}{Fore.CYAN}.{Style.RESET_ALL}")
     print(f"{Fore.YELLOW}You best restart Quarter OS to take effect. (Except for OOBE){Style.RESET_ALL}")
-    return True
+    return 1
 
-def ping(working_dir, host):
+def ping(working_dir, args):
     """Check the network connection to a host."""
     __usage__ = "Usage: ping <host>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    host = args[0]
     try:
         if os_type == "windows":
             ping_result = subprocess.run(["ping", "-n", "4", host])
@@ -388,9 +402,13 @@ def ping(working_dir, host):
         print(f"{Fore.RED}Error: Ping command not found. Please check your system configuration.{Style.RESET_ALL}")
         return
 
-def down(working_dir, url):
+def down(working_dir, args):
     """Download a file from the internet."""
     __usage__ = "Usage: down <url>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    url = args[0]
     try:
         response = requests.get(url, stream=True)
         if response.status_code == 200:
@@ -411,9 +429,16 @@ def down(working_dir, url):
     except Exception as e:
         print(f"{Fore.RED}Download file failed. Error: {e}{Fore.RESET}")
 
-def backup(working_dir, arg):
+def backup(working_dir, args):
     """Backup Quarter OS Datas"""
     __usage__ = "Usage: backup <-c/-r/-l>"
+    if len(args) == 0:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return
+    arg = args[0]
+    if arg not in ["-c", "-r", "-l"]:
+        print(f"{Fore.RED}Invalid argument. Please enter '-c' or '-r' or '-l'.{Style.RESET_ALL}")
+        return
     bpath = os.path.join(qos_path, "backup")
     if arg == "-l":
         try:
@@ -549,7 +574,7 @@ def help():
 
 def about():
     print(f"{Fore.LIGHTBLUE_EX}% Quarter OS - About %{Style.RESET_ALL}")
-    options.cat("system/etc/about.txt")
+    features.cat("system/etc/about.txt")
 
 def version():
     print(f"{Fore.GREEN}Quarter OS Version: {Fore.CYAN}{qos_version}{Style.RESET_ALL}")
@@ -666,8 +691,36 @@ def pm_check_args(args, working_path):
     pm_tips()
     del biscuit
 
-# Run more commands
+# Shizuku Compatiblity
+def szk_tips():
+    print(f"{Fore.LIGHTGREEN_EX}% Shizuku Package Manager %{Style.RESET_ALL}")
+    print(f"{Fore.LIGHTGREEN_EX}==========================={Style.RESET_ALL}")
+    print(f"{Fore.CYAN}install <path> - Install a package{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}remove <pkg>   - Remove a package{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}list           - List all installed packages{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}run <pkg>      - Run a installed shizuku package{Style.RESET_ALL}")
 
+def szk_check_args(args, working_path):
+    import system.core.shizuku as shizuku
+    if args[0] == "list":
+        shizuku.list()
+        return 0
+    if args[0] == "install":
+        if len(args) == 2:
+            shizuku.install(working_path, args[1])
+            return 0
+    if args[0] == "remove":
+        if len(args) == 2:
+            shizuku.remove(args[1])
+            return 0
+    if args[0] == "run":
+        if len(args) == 2:
+            shizuku.run(args[1])
+            return 0
+    szk_tips()
+    del shizuku
+
+# Run more commands
 def ucprogress(shell_command, working_path):
     with open(os.path.join(data_path, "config", "shell.json"), "r") as apps_file:
         apps_config = json.load(apps_file)
@@ -710,11 +763,10 @@ def run_3rd_party_apps(shell_command, working_path):
         if third_party_script_path == os.path.join(app_path, "main.py"):
             if os.path.isfile(third_party_script_path):
                 os.chdir(os.path.join(qos_path, "data", "apps", shell_command))
-                if os_type == "windows":
-                    process = subprocess.Popen(["python", third_party_script_path])
-                else:
-                    process = subprocess.Popen(["python3", third_party_script_path])
+                process = subprocess.Popen([subprocess.sys.executable, third_party_script_path])
                 process.wait()
+                if process.returncode != 0:
+                    print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
                 process.kill()
                 os.chdir(qos_path)
             else:
@@ -738,11 +790,10 @@ def run_sys_apps(shell_command, working_path):
     try:
         system_app_path = os.path.join(qos_path, "system", "apps", shell_command + ".py")
         if os.path.isfile(system_app_path):
-            if os_type == "windows":
-                process = subprocess.Popen(["python", system_app_path])
-            else:
-                process = subprocess.Popen(["python3", system_app_path])
+            process = subprocess.Popen([subprocess.sys.executable, system_app_path])
             process.wait()
+            if process.returncode != 0:
+                print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
             process.kill()
         else:
             run_3rd_party_apps(shell_command, working_path)
@@ -761,11 +812,10 @@ def run_sys_apps(shell_command, working_path):
 def run_local_prog(working_path, current_script_path):
     try:
         os.chdir(working_path)
-        if os_type == "windows":
-            process = subprocess.Popen(["python", current_script_path])
-        else:
-            process = subprocess.Popen(["python3", current_script_path])
+        process = subprocess.Popen([subprocess.sys.executable, current_script_path])
         process.wait()
+        if process.returncode != 0:
+            print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
         process.kill()
         os.chdir(qos_path)
     except subprocess.CalledProcessError as e:

@@ -130,7 +130,7 @@ def install(working_path, pkg_path):
                             req = req.strip().replace(" ", "")
                             if req:  # 确保 req 不是空字符串
                                 print(f"{Fore.CYAN}Installing Module {req_index}: {Fore.YELLOW}{req}{Fore.CYAN}...{Fore.RESET}")
-                                subprocess.run([sys.executable, "-m", "pip", "install", req], check=True)
+                                subprocess.run([subprocess.sys.executable, "-m", "pip", "install", req], check=True)
                                 req_index += 1
                         print(f"{Fore.GREEN}Dependencies installed successfully.{Fore.RESET}")
                     except subprocess.CalledProcessError as e:

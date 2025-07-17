@@ -12,13 +12,50 @@ try:
     from colorama import init as cinit
     from colorama import Fore, Style, Back
     # Core Modules
-    import system.core.options as options
+    import system.core.features as features
     import system.core.cmds as cmds
 except ImportError as e:
     print(f"Error: {e}")
     sys.exit(1)
 
 cinit(autoreset=True)
+
+def make_system_name():
+    qos_config_path = pathlib.Path("data/config/config.json")
+    if not qos_config_path.exists():
+        print(f"{Style.BRIGHT}{Fore.RED}config.json not found.{Style.RESET_ALL}")
+        return None
+    with open(qos_config_path, "r") as qos_config_file:
+        config = json.load(qos_config_file)
+    while True:
+        try:
+            system_name = input(Fore.LIGHTMAGENTA_EX + "System Name" + Style.RESET_ALL + " : ")
+            if system_name == "":
+                print(f"{Style.BRIGHT}{Fore.RED}Please enter a system name.{Style.RESET_ALL}")
+                continue
+            elif len(system_name) > 20:
+                print(f"{Style.BRIGHT}{Fore.RED}System name cannot be longer than 20 characters.{Style.RESET_ALL}")
+                continue
+            elif " " in system_name:
+                print(f"{Style.BRIGHT}{Fore.RED}System name cannot contain spaces. You can use '_' instead.{Style.RESET_ALL}")
+                continue
+            elif any(char in "!@#$%^&*()[]{};:,./<>?\|`~=+" for char in system_name):
+                print(f"{Style.BRIGHT}{Fore.RED}System name cannot contain special characters. You can only use '_' and '-'.{Style.RESET_ALL}")
+                continue
+            else:
+                # Check if system name already exists
+                print(f"{Fore.LIGHTGREEN_EX}Your system name is '{system_name}'. Is this correct? (y/n){Style.RESET_ALL}")
+                if not str(input("> ")).lower() == "y":
+                    continue
+                else:
+                    break
+        except KeyboardInterrupt:
+            print(f"{Fore.RED}(KeyboardInterrupt Exit){Style.RESET_ALL}")
+            return 10
+    with open(qos_config_path, "w") as qos_config_file:
+        config["system_name"] = system_name
+        json.dump(config, qos_config_file, indent=4)
+    return system_name
 
 def confirm_username():
     user_file_path = pathlib.Path("data/config/users.json")
@@ -31,7 +68,6 @@ def confirm_username():
     while True:
         try:
             username = input(Fore.LIGHTMAGENTA_EX + "UserName" + Style.RESET_ALL + " : ")
-            
             if username == "":
                 print(f"{Style.BRIGHT}{Fore.RED}Please enter a default user name.{Style.RESET_ALL}")
                 continue
@@ -53,7 +89,7 @@ def confirm_username():
             else:
                 # Check if username already exists
                 existing_usernames = {user_data["username"] for user_data in config.values()}
-                if username in ["admin", "root", "guest", "superuser", "su"]:
+                if username in ["admin", "root", "guest", "superuser", "su", "exit"]:
                     print(f"{Style.BRIGHT}{Fore.RED}User name cannot be one of the reserved keywords.{Style.RESET_ALL}")
                     continue
                 elif username in existing_usernames:
@@ -122,90 +158,6 @@ def confirm_user_account(username, password):
     except KeyboardInterrupt:
         print(f"{Fore.RED}Operation canceled.{Style.RESET_ALL}")
         return False
-
-def qos_login():
-    try:
-        with open(os.path.join("data", "config", "users.json"), "r") as qos_user_file:
-            config = json.load(qos_user_file)
-    except FileNotFoundError:
-        print(Fore.RED + "File 'users.json' not found, please check the file path." + Style.RESET_ALL)
-        cmds.clear()
-        sys.exit(1)
-    except json.JSONDecodeError:
-        print(Fore.RED + "File 'users.json' is not a valid JSON file." + Style.RESET_ALL)
-        cmds.clear()
-        sys.exit(1)
-    while True:
-        try:
-            print(f"{Fore.LIGHTGREEN_EX}Enter a user name to login: {Style.RESET_ALL}")
-            username = input(">>> ").strip().lower().replace(" ", "_")
-            if username == "":
-                print(f"{Fore.RED}Please enter a user name.{Style.RESET_ALL}")
-                continue
-            if username == "exit":
-                print(f"{Fore.RED}Exiting...{Style.RESET_ALL}")
-                cmds.clear()
-                sys.exit(1)
-            user_found = False
-            login_success = False
-            de_password = ""
-            for user_data in config.values():
-                if user_data.get("username") == username:
-                    user_found = True
-                    password = user_data.get("password", "")
-                    if not password:
-                        login_success = True
-                        break
-                    else:
-                        de_password = base64.b64decode(password).decode('utf-8')
-                        break
-            if not user_found:
-                print(f"{Fore.RED}User not found. Please try again.{Style.RESET_ALL}")
-                continue
-            while True:
-                try:
-                    if login_success:
-                        break
-                    print(f"{Fore.LIGHTGREEN_EX}Enter password: {Style.RESET_ALL}")
-                    input_password = getpass.getpass(">>> ")
-                    if input_password == de_password:
-                        login_success = True
-                        with open(os.path.join(os.getcwd(), "data", "config", "config.json"), "r") as config_file:
-                            config = json.load(config_file)
-                        config["last_login"] = username
-                        config["last_login_time"] = tm.strftime("%Y-%m-%d %H:%M:%S", tm.localtime())
-                        with open(os.path.join(os.getcwd(), "data", "config", "config.json"), "w") as config_file:
-                            json.dump(config, config_file, indent=4)
-                        break
-                    else:
-                        print(Fore.RED + "Incorrect password, please try again." + Style.RESET_ALL)
-                        continue
-                except KeyboardInterrupt:
-                    print(f"{Style.DIM}{Fore.GREEN}(Change User Account){Style.RESET_ALL}")
-                    break
-                except EOFError:
-                    print(f"{Style.DIM}{Fore.GREEN}(Change User Account){Style.RESET_ALL}")
-                    break
-                except Exception as e:
-                    print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
-                    break
-            if login_success:
-                print()
-                options.jump_print(" Welcome to QOS ", Fore.MAGENTA, Style.BRIGHT)
-                print()
-                return username
-        except KeyboardInterrupt:
-            print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
-            cmds.clear()
-            sys.exit(1)
-        except EOFError:
-            print(f"{Style.DIM}{Fore.YELLOW}\nEOF detected. Exiting...{Style.RESET_ALL}")
-            cmds.clear()
-            sys.exit(1)
-        except Exception as e:
-            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
-            cmds.clear()
-            sys.exit(1)
 
 def add_user():
     # Set new user name
