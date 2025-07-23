@@ -1,5 +1,5 @@
 {
-    "NoArgs": {
+    "Core": {
         "pwd": "Show the current working directory",
         "cwd": "Show the REAL current working directory",
         "help": "Show the list of available commands",
@@ -10,10 +10,9 @@
         "date": "Show the current date",
         "sysinfo": "Show system information",
         "clear": "Clear the console",
+        "eula": "Show the End-User License Agreement",
         "exit": "Exit QOS",
-        "reboot": "Reboot QOS"
-    },
-    "NeedArgs": {
+        "reboot": "Reboot QOS",
         "cat": "Show the content of a file",
         "echo": "Display a message on the console",
         "cp": "Copy a file or directory",
@@ -25,29 +24,21 @@
         "mkdir": "Create a new directory",
         "rename": "Rename a file or directory",
         "rm": "Remove a file or directory",
-        "activate": "Activate Quarter OS by using Activate Code",
         "ping": "Check the network connection to a host",
-        "down": "Download a file from the internet",
-        "backup": "Backup Quarter OS Datas"
+        "down": "Download a file from the internet"
     },
     "SystemKit": {
-        "settings": "Open the system settings"
+        "settings": "Open the system settings",
+        "backup": "Manage Quarter OS Backups",
+        "activate": "Activate Quarter OS"
     },
     "PackageManager": {
         "biscuit": "Quarter OS Package Manager",
-        "pkg": "A simple name to use Biscuit",
-        "bkt": "A simple name to use Biscuit",
-        "bpm": "A simple name to use Biscuit",
-        "pm": "A simple name to use Biscuit"
-    },
-    "ShizukuCompat": {
         "shizuku": "PY OS Improved Package Manager on Quarter OS",
-        "szk": "A simple name to use Shizuku"
-    },
-    "SystemApps": {
-        "calc": "A simple calculator",
-        "calender": "A simple calendar",
-        "weather": "A simple weather app",
-        "console": "A simple Python console"
+        "pm": null,
+        "pkg": null,
+        "bpm": null,
+        "bkt": null,
+        "szk": null
     }
 }

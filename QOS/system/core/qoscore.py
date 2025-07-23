@@ -1,8 +1,6 @@
 # QOS Boot System Core
 
 import os
-import sys
-import shutil
 import json
 import platform
 import pathlib
@@ -56,15 +54,48 @@ def check_config_dir():
     try:
         conf_created = False
         data_config_dir = os.path.join(os.getcwd(), "data", "config")
-        system_config_dir = os.path.join(os.getcwd(), "system", "config")
         if not os.path.exists(os.path.join(data_config_dir, "config.json")):
-            shutil.copyfile(os.path.join(system_config_dir, "config.json"), os.path.join(data_config_dir, "config.json"))
+            qos_config_data = {
+                "os_type": "windows",
+                "version": "Alpha 0.2.2",
+                "qos_path": None,
+                "startup_title": "QOS Alpha 0.2.2",
+                "qos_startup_logo": "1",
+                "system_name": None,
+                "oobe": True,
+                "biscuit_repo": "https://os.drevan.xyz/biscuit/repo/",
+                "qos_edition": None,
+                "activate_code": None,
+                "activate_statue": False,
+                "ad_statue": True,
+                "data_path": None,
+                "home_path": None,
+                "system_path": None,
+                "shell_theme": "1",
+                "unknown_command_progression": False,
+                "last_login": None,
+                "last_login_time": None
+            }
+            with open(os.path.join(data_config_dir, "config.json"), "w") as qos_config_file:
+                json.dump(qos_config_data, qos_config_file, indent=4)
             conf_created = True
         if not os.path.exists(os.path.join(data_config_dir, "users.json")):
-            shutil.copyfile(os.path.join(system_config_dir, "users.json"), os.path.join(data_config_dir, "users.json"))
-            conf_created = True
-        if not os.path.exists(os.path.join(data_config_dir, "shell.json")):
-            shutil.copyfile(os.path.join(system_config_dir, "shell.json"), os.path.join(data_config_dir, "shell.json"))
+            qos_users_data = {
+                "user1": {
+                    "username": "root",
+                    "password": "MTIzNDU2"
+                },
+                "user2": {
+                    "username": "admin",
+                    "password": "MTIzNDU2"
+                },
+                "user3": {
+                    "username": "guest",
+                    "password": None
+                }
+            }
+            with open(os.path.join(data_config_dir, "users.json"), "w") as qos_users_file:
+                json.dump(qos_users_data, qos_users_file, indent=4)
             conf_created = True
         return conf_created
     except Exception as e:
@@ -94,39 +125,40 @@ def check_more_dir():
         print(f"An error occurred: {e}")
         return False
 
-def check_os():
-    with open("data/config/config.json", "r") as qos_config_file:
-        config = json.load(qos_config_file)
-    detected_os = platform.system().lower()
-    os_mapping = {
-        "windows": "windows",
-        "linux": "linux",
-        "darwin": "macos"
-    }
-    config_os_type = os_mapping.get(detected_os, "unknown")
-    if config.get("os_type", "").lower() != config_os_type:
-        config["os_type"] = config_os_type
-    with open("data/config/config.json", "w") as qos_config_file:
-        json.dump(config, qos_config_file, indent=4)
-    return config_os_type
-
-def check_path():
-    qos_path = os.getcwd()
-    data_path = os.path.join(qos_path, "data")
-    home_path = os.path.join(qos_path, "home")
-    system_path = os.path.join(qos_path, "system")
-    with open("data/config/config.json", "r") as qos_config_file:
-        config_data = json.load(qos_config_file)
-    json_qos_path = config_data.get("qos_path", "")
-    json_data_path = config_data.get("data_path", "")
-    json_home_path = config_data.get("home_path", "")
-    json_system_path = config_data.get("system_path", "")
-    if json_qos_path != qos_path or json_data_path != data_path or json_home_path != home_path:
-        config_data["qos_path"] = qos_path
-        config_data["data_path"] = data_path
-        config_data["home_path"] = home_path
-        config_data["system_path"] = system_path
+def check_os_path():
+    try:
+        with open("data/config/config.json", "r") as qos_config_file:
+            config_data = json.load(qos_config_file)
+        os_mapping = {
+            "windows": "windows",
+            "linux": "linux",
+            "darwin": "macos"
+        }
+        # div
+        detected_os = platform.system().lower()
+        qos_path = os.getcwd()
+        data_path = os.path.join(qos_path, "data")
+        home_path = os.path.join(qos_path, "home")
+        system_path = os.path.join(qos_path, "system")
+        # div
+        json_os_type = os_mapping.get(detected_os, "unknown")
+        json_qos_path = config_data.get("qos_path", "")
+        json_data_path = config_data.get("data_path", "")
+        json_home_path = config_data.get("home_path", "")
+        json_system_path = config_data.get("system_path", "")
+        if config_data.get("os_type", "").lower() != json_os_type:
+            config_data["os_type"] = json_os_type
+        if json_qos_path != qos_path:
+            config_data["qos_path"] = qos_path
+        if json_data_path != data_path:
+            config_data["data_path"] = data_path
+        if json_home_path != home_path:
+            config_data["home_path"] = home_path
+        if json_system_path != system_path:
+            config_data["system_path"] = system_path
         with open("data/config/config.json", "w") as qos_config_file:
             json.dump(config_data, qos_config_file, indent=4)
-    else:
-        pass
+        return detected_os, qos_path
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return "unknown", os.getcwd()

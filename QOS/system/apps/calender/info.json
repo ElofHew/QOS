@@ -1,0 +1,18 @@
+{
+    "name": "calender",
+    "version": "1.0",
+    "version_code": "1000",
+    "author": "QuarterOS",
+    "description": "Quarter OS Calender Application",
+    "category": "Tools",
+    "min_python_version": "3.10",
+    "target_python_version": "3.12",
+    "comptb_os": "windows",
+    "biscuit_version": "1.0",
+    "tags": [
+        "calender",
+        "python",
+        "quarteros"
+    ],
+    "depends": []
+}

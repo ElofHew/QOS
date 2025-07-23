@@ -80,31 +80,40 @@ except Exception as e:
 
 # Start Main Program （启动主程序）
 if __name__ == "__main__":
+    work_path = os.getcwd()
     try:
+        import os
         import sys
-        import system.main as qos
+        import time
+        import subprocess
         while True:
-            qos_return_code = qos.main()
+            process = subprocess.Popen([sys.executable, os.path.join(work_path, "system", "main.py"), "--boot", "--regular"], shell=True)
+            process.wait()
+            qos_return_code = process.returncode
             match qos_return_code:
                 case 0:
                     # 0: 正常退出(关机)
-                    sys.exit(0)
+                    break
                 case 1:
                     # 1: 重新运行(重启)
-                    import os, time
-                    if sys.platform == "win32":
-                        os.system("cls")
-                    else:
-                        os.system("clear")
                     time.sleep(1)
                     continue
+                case 2:
+                    # 2: 暂未开发但已预留的启动项
+                    print("Error: This feature is not yet developed.")
+                    break
+                case 3:
+                    # 3: 启动参数不正确
+                    print("Error: Invalid startup parameters.")
+                    break
                 case _:
                     # 其他值: 未知错误
                     print(f"Error: Unknown return code {qos_return_code}.")
                     break
+        input("(Press any key to exit)")
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Exiting QOS.")
         sys.exit(0)
-    except Exception as e:
+    except (FileNotFoundError, NotADirectoryError, ImportError, Exception) as e:
         print(f"Error: {e}")
         sys.exit(0)

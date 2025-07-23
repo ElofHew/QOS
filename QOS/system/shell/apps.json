@@ -1,0 +1,50 @@
+{
+    "calc": {
+        "path": "./system/apps/calc",
+        "version": "1.0",
+        "version_code": "1000",
+        "author": "QuarterOS",
+        "description": "Quarter OS Calculator Application",
+        "category": "Tools",
+        "min_python_version": "3.10",
+        "target_python_version": "3.12",
+        "comptb_os": "windows",
+        "biscuit_version": "1.0"
+    },
+    "calender": {
+        "path": "./system/apps/calender",
+        "version": "1.0",
+        "version_code": "1000",
+        "author": "QuarterOS",
+        "description": "Quarter OS Calendar Application",
+        "category": "Tools",
+        "min_python_version": "3.10",
+        "target_python_version": "3.12",
+        "comptb_os": "windows",
+        "biscuit_version": "1.0"
+    },
+    "console": {
+        "path": "./system/apps/console",
+        "version": "1.0",
+        "version_code": "1000",
+        "author": "QuarterOS",
+        "description": "Quarter OS Console Application",
+        "category": "Tools",
+        "min_python_version": "3.10",
+        "target_python_version": "3.12",
+        "comptb_os": "windows",
+        "biscuit_version": "1.0"
+    },
+    "weather": {
+        "path": "./system/apps/weather",
+        "version": "1.0",
+        "version_code": "1000",
+        "author": "QuarterOS",
+        "description": "Quarter OS Weather Application",
+        "category": "Tools",
+        "min_python_version": "3.10",
+        "target_python_version": "3.12",
+        "comptb_os": "windows",
+        "biscuit_version": "1.0"
+    }
+}

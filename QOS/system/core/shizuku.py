@@ -27,7 +27,47 @@ szk_install_path = os.path.join(qos_path, "data", "shizuku")
 if not os.path.exists(szk_install_path):
     os.makedirs(szk_install_path)
 
-def run(pkg_name):
+def main(working_path, args):
+    try:
+        if not args:
+            tips()
+            return 0
+        if args[0]:
+            match args[0]:
+                case "help":
+                    tips()
+                case "list":
+                    list_apps()
+                case "install":
+                    install(working_path, args[1:])
+                case "remove":
+                    remove(args[1:])
+                case "run":
+                    run(args[1:])
+                case _:
+                    print(f"{Fore.RED}Invalid arguments.{Fore.RESET}")
+            return 0
+    except KeyboardInterrupt:
+        print(f"{Fore.RED}Operation cancelled.{Fore.RESET}")
+        return 0
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
+        return 1
+
+def tips():
+    print(f"{Fore.LIGHTGREEN_EX}% Shizuku Package Manager %{Style.RESET_ALL}")
+    print(f"{Fore.LIGHTGREEN_EX}==========================={Style.RESET_ALL}")
+    print(f"{Fore.CYAN}install <path> - Install a package{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}remove <pkg>   - Remove a package{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}list           - List all installed packages{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}run <pkg>      - Run a installed shizuku package{Style.RESET_ALL}")
+
+def run(aargs):
+    __usage__ = "Usage: shizuku run <pkg>"
+    if len(aargs)!= 1:
+        print(f"{Fore.YELLOW}{__usage__}{Style.RESET_ALL}")
+        return
+    pkg_name = aargs[0]
     app_dir_path = os.path.join(szk_install_path, pkg_name)
     if not os.path.isdir(app_dir_path):
         print(f"{Fore.RED}Error: {pkg_name} not found.{Style.RESET_ALL}")
@@ -53,7 +93,15 @@ def run(pkg_name):
                     szk_process.kill()
                 os.chdir(qos_path)
 
-def install(work_dir, pkg_path):
+def install(work_dir, aargs):
+    __usage__ = "Usage: shizuku install <path>"
+    if len(aargs)!= 1:
+        print(f"{Fore.YELLOW}{__usage__}{Style.RESET_ALL}")
+        return 1
+    pkg_path = aargs[0]
+    if not os.path.isfile(os.path.join(work_dir, pkg_path)):
+        print(f"{Fore.RED}Error: {pkg_path} not found.{Style.RESET_ALL}")
+        return 1
     pkg_file = os.path.join(work_dir, pkg_path)
     print(Fore.CYAN + f"path: {os.path.abspath(pkg_file)}" + Style.RESET_ALL)
     
@@ -135,7 +183,12 @@ def install(work_dir, pkg_path):
         return 1
 
 
-def remove(app_name):
+def remove(aargs):
+    __usage__ = "Usage: shizuku remove <pkg>"
+    if len(aargs)!= 1:
+        print(f"{Fore.YELLOW}{__usage__}{Style.RESET_ALL}")
+        return 1
+    app_name = aargs[0]
     # 打印应用名称
     print(Fore.CYAN + f"Removing package: {app_name}")
     # 循环提示用户是否要卸载该包，直到输入有效选项
@@ -171,7 +224,7 @@ def remove(app_name):
         print(Fore.RED + f"An error occurred during removal: {e}")
         return 1
 
-def list():
+def list_apps():
     try:
         # 打印已安装的应用列表
         print(Fore.CYAN + "Installed packages:")

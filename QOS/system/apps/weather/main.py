@@ -1,6 +1,7 @@
 # QOS Weather Application
 
 import os
+import sys
 import requests
 import datetime
 import json
@@ -37,7 +38,7 @@ init(autoreset=True)
 
 api_base_url = "https://api.seniverse.com/v3/weather/now.json"
 
-weather_config_path = os.path.join(os.getcwd(), "data", "data", "weather")
+weather_config_path = os.path.join("..", "..", "..", "data", "data", "weather")
 weather_config_file = os.path.join(weather_config_path, "weather.json")
 
 def get_weather_settings():

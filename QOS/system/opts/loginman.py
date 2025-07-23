@@ -17,11 +17,11 @@ def qos_login():
     except FileNotFoundError:
         print(Fore.RED + "File 'users.json' not found, please check the file path." + Style.RESET_ALL)
         features.clear()
-        sys.exit(1)
+        sys.exit(0)
     except json.JSONDecodeError:
         print(Fore.RED + "File 'users.json' is not a valid JSON file." + Style.RESET_ALL)
         features.clear()
-        sys.exit(1)
+        sys.exit(0)
     while True:
         try:
             print(f"{Fore.LIGHTGREEN_EX}Enter a user name to login: {Style.RESET_ALL}")
@@ -32,7 +32,7 @@ def qos_login():
             if username == "exit":
                 print(f"{Fore.RED}Exiting...{Style.RESET_ALL}")
                 features.clear()
-                sys.exit(1)
+                sys.exit(0)
             user_found = False
             login_success = False
             de_password = ""
@@ -84,15 +84,15 @@ def qos_login():
         except KeyboardInterrupt:
             print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
             features.clear()
-            sys.exit(1)
+            sys.exit(0)
         except EOFError:
             print(f"{Style.DIM}{Fore.YELLOW}\nEOF detected. Exiting...{Style.RESET_ALL}")
             features.clear()
-            sys.exit(1)
+            sys.exit(0)
         except Exception as e:
             print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
             features.clear()
-            sys.exit(1)
+            sys.exit(0)
 
 def main(version, startup_title):
     print(Style.DIM + Fore.YELLOW + "Quarter OS Login Manager - " + version + Style.RESET_ALL + "\n")

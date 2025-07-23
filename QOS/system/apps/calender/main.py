@@ -1,6 +1,6 @@
 # QOS Calender App
 
-import time
+import sys
 import datetime
 import calendar
 from colorama import init, Fore, Back, Style

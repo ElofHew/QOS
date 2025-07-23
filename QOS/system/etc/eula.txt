@@ -1,16 +1,26 @@
-Quarter OS End-User EULA
+Quarter OS End-User EULA - Oak Studio
 
-Thanks for choosing QOS! We hope you can enjoy it.
+Thank you for choosing QOS! We hope you can enjoy it.
 
-QOS is a Fake Operating System that Powered by Python 3.
-Full name of QOS is "Quarter Operating System" but IT IS NOT RELATED TO "QoS" in Network Technology.
+QOS is a Fake Operating System powered by Python 3. The full name of QOS is "Quarter Operating System," but it is NOT RELATED TO "QoS" in Network Technology.
 
-By using QOS, you should accept the following End-User EULA:
-1. QOS may record your actions and some data of your computer.
-2. QOS may have access to modify other files on your computer.
-3. QOS may have access to get your personal information.
+By using QOS, you agree to the following End-User EULA:
+1. QOS may record your actions and some data on your computer and may access and modify other files and retrieve your personal information.
+2. Oak Studio is not responsible for any damage to your computer while using QOS, unless you provide sufficient evidence that QOS contains malicious code that causes such damage.
+3. We do not recommend using QOS in important or production environments as it may not be very stable.
+4. You should not use QOS for illegal or unethical purposes and must not use it to harm other people or organizations.
+5. You cannot use QOS in business or enterprise environments.
+6. You must not sell QOS on the Internet or any other platform without our permission.
+7. Please comply with the GNU General Public License (GPL) v3.0 to distribute QOS.
 
-Attentions:
-1. QOS is not like Subsystems (such as Windows Subsystem for Linux), real OS and VM.
-2. Some incorrrect actions in QOS may destroy QOS system and files on your computer.
-3. If you want to improve QOS, please allow GNU General Public License (GPL) v3.0.
+Additional Terms:
+8. **Support and Maintenance**: Oak Studio provides support for QOS, but the extent of support is limited to the resources available. Users should regularly check for updates.
+9. **Intellectual Property**: All rights in QOS are reserved by Oak Studio. Users may not reverse engineer, decompile, or disassemble QOS without explicit permission.
+10. **Termination of Agreement**: This agreement may be terminated by Oak Studio at any time if you violate any of the terms. Users may also terminate the agreement by uninstalling QOS.
+
+Attention:
+1. QOS is not like subsystems (such as Windows Subsystem for Linux), a real operating system, or a virtual machine.
+2. Some incorrect actions in QOS may destroy the QOS system and files on your computer.
+3. As you can, please avoid using Ctrl+C in KomShell, as this may cause the QOS system to crash.
+
+2025.07.23 - Oak Studio
