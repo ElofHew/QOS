@@ -19,7 +19,7 @@ from colorama import init, Fore, Back, Style  # 用于控制输出颜色
 init(autoreset=True)  # 初始化颜色模块
 
 try:
-    with open("data/config/config.json", "r") as f:
+    with open(os.path.join("data", "config", "config.json"), "r") as f:
         config = json.load(f)
         qos_path = config.get("qos_path", os.getcwd())
         os_type = config.get("os_type", platform.system().lower())
@@ -151,11 +151,11 @@ def install(working_path, aargs):
     # Install app
     # Check the most compatible items
     try:
-        if app_comptb.lower() != os_type:
+        if app_comptb.lower() != os_type.lower():
             print(f"{Fore.YELLOW}WARN: This app may be not compatible with your system.{Fore.RESET}")
-        if app_min > python_ver:
+        if int(app_min.split(".")[1]) > int(python_ver.split(".")[1]):
             print(f"{Fore.YELLOW}WARN: This app requires Python {app_min} or higher, but your Python version is {python_ver}.{Fore.RESET}")
-        if app_tar != python_ver:
+        if int(app_tar.split(".")[1]) != int(python_ver.split(".")[1]):
             print(f"{Fore.YELLOW}WARN: This app may not work properly with your Python version.{Fore.RESET}")
         if app_bktver != biscuit_ver:
             print(f"{Fore.YELLOW}WARN: This app may not work properly with your Biscuit version.{Fore.RESET}")
@@ -317,7 +317,7 @@ def remove(aargs):
 
     # Check app registry
     try:
-        with open("data/shell/apps.json") as add_app_f:
+        with open("data/shell/apps.json", "r") as add_app_f:
             add_app_config = json.load(add_app_f)
             if app_name in add_app_config:
                 app_dir = add_app_config[app_name]["path"]

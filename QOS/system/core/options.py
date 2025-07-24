@@ -1,7 +1,6 @@
 # QOS Advanced Options
 
 import os
-import sys
 import json
 from platform import system as pfs
 from colorama import init as cinit

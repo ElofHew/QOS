@@ -12,7 +12,7 @@ init(autoreset=True)
 
 def get_ads():
     try:
-        with open("data/config/config.json", "r") as config_file:
+        with open(os.path.join("data", "config", "config.json"), "r") as config_file:
             config_file = json.load(config_file)
             activate_statue = config_file["activate_statue"]
             ad_statue = config_file["ad_statue"]

@@ -10,8 +10,7 @@ cinit(autoreset=True)
 
 with open(os.path.join("data", "config", "config.json"), "r") as config_file:
     config_data = json.load(config_file)
-    qos_path = config_data["qos_path"]
-    ucp = config_data["unknown_command_progression"]
+    qos_path = config_data.get("qos_path", os.getcwd())
 
 # Run system kits
 def run_system_kits(command, args=[]):
@@ -39,6 +38,9 @@ def run_system_kits(command, args=[]):
 # Run more commands
 def ucprogress(working_path, shell_command, args=[]):
     try:
+        with open(os.path.join(qos_path, "data", "config", "config.json"), "r") as config_file:
+            config_data = json.load(config_file)
+        ucp = config_data.get("unknown_command_progression", False)
         if not ucp:
             print(f"{Fore.RED}Unknown command: {Fore.RESET}{shell_command}")
             return 0
@@ -48,7 +50,6 @@ def ucprogress(working_path, shell_command, args=[]):
         process = subprocess.run([boot_string] + boot_args)
         if process.returncode != 0:
             print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
-        process.kill()
         os.chdir(qos_path)
         return 0
     except subprocess.CalledProcessError as e:
@@ -89,7 +90,6 @@ def run_3rd_party_apps(working_path, shell_command, args=[]):
             process = subprocess.run([sys.executable, boot_string] + boot_args)
             if process.returncode != 0:
                 print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
-            process.kill()
             os.chdir(qos_path)
             return 0
         else:
@@ -135,7 +135,6 @@ def run_sys_apps(working_path, shell_command, args=[]):
             process = subprocess.run([sys.executable, boot_string] + boot_args)
             if process.returncode != 0:
                 print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
-            process.kill()
             os.chdir(qos_path)
             return 0
         else:
@@ -172,7 +171,6 @@ def run_local_prog(working_path, shell_command, args=[]):
         process = subprocess.run([sys.executable, boot_string] + boot_args)
         if process.returncode != 0:
             print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
-        process.kill()
         os.chdir(qos_path)
         return 0
     except subprocess.CalledProcessError as e:

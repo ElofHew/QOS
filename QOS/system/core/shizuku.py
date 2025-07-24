@@ -3,7 +3,7 @@
 @ Shizuku Software Manager
 @ Shizuku Application Package Installer Core Module
 @ Author: ElofHew
-@ Version: 1.0
+@ Version: 2.0
 @ Date: 2025.05.02
 """
 
@@ -14,6 +14,7 @@ import zipfile  # 用于处理ZIP文件的压缩和解压缩
 import time     # 用于添加延迟
 import json     # 用于处理JSON文件的读取和写入
 import shutil   # 用于文件和目录的高级操作，如复制文件和删除文件夹等
+from platform import python_version as pv # 用于获取当前操作系统类型
 from colorama import Fore, Style, init # 用于控制终端输出的颜色
 
 init(autoreset=True) # 初始化颜色模块
@@ -23,6 +24,7 @@ with open(os.path.join(os.getcwd(), "data", "config", "config.json")) as qos_con
     os_type = qos_config["os_type"]
     qos_path = qos_config["qos_path"]
 
+python_ver = pv()
 szk_install_path = os.path.join(qos_path, "data", "shizuku")
 if not os.path.exists(szk_install_path):
     os.makedirs(szk_install_path)
@@ -37,7 +39,7 @@ def main(working_path, args):
                 case "help":
                     tips()
                 case "list":
-                    list_apps()
+                    list_apps(args[1:])
                 case "install":
                     install(working_path, args[1:])
                 case "remove":
@@ -64,187 +66,342 @@ def tips():
 
 def run(aargs):
     __usage__ = "Usage: shizuku run <pkg>"
-    if len(aargs)!= 1:
+    if len(aargs) < 1:
         print(f"{Fore.YELLOW}{__usage__}{Style.RESET_ALL}")
         return
-    pkg_name = aargs[0]
+    if len(aargs) == 1:
+        pkg_name = aargs[0]
+        args = []
+    else:
+        pkg_name = aargs[0]
+        args = aargs[1:]
+    # Check if app exists
     app_dir_path = os.path.join(szk_install_path, pkg_name)
-    if not os.path.isdir(app_dir_path):
-        print(f"{Fore.RED}Error: {pkg_name} not found.{Style.RESET_ALL}")
-        return
-    if os.listdir(app_dir_path) == []:
-        print(f"{Fore.RED}No Shizuku package installed.{Style.RESET_ALL}")
-        return
-    for app_main in os.listdir(app_dir_path):
-        app_main_path = os.path.join(app_dir_path, app_main)
-        if os.path.isfile(app_main_path) and app_main.endswith(".py"):
-            try:
-                os.chdir(app_dir_path)
-                szk_process = subprocess.run([subprocess.sys.executable, app_main_path])
-                if szk_process.returncode != 0:
-                    print(f"{Fore.RED}Error: subprocess returned {szk_process.returncode}{Style.RESET_ALL}")
-                    return
-            except Exception as e:
-                print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
-                return
-            finally:
-                if szk_process.poll() is None:
-                    szk_process.kill()
-                os.chdir(qos_path)
+    try:
+        # 3rd party apps
+        third_party_app_list = os.path.join(qos_path, "data", "shizuku", "apps.json")
+        # Open json files
+        with open(third_party_app_list, "r") as tpapp_file:
+            tpapp_list = json.load(tpapp_file)
+        # Check command
+        if pkg_name in tpapp_list:
+            app_path = tpapp_list.get(pkg_name)["path"]
+            if os.path.exists(app_path):
+                app_file = os.path.join(app_path, "main.py")
+                if not os.path.isfile(app_file):
+                    print(f"{Fore.RED}Error: {app_file} not found.{Style.RESET_ALL}")
+                    return 1
+            else:
+                print(f"{Fore.RED}Error: {app_path} not found.{Style.RESET_ALL}")
+                return 1
+            boot_string = str(os.path.join(qos_path, app_file))
+            # Check arguments
+            boot_args = args if args else []
+            # Run app
+            os.chdir(app_path)
+            process = subprocess.run([sys.executable, boot_string] + boot_args)
+            if process.returncode != 0:
+                print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
+            os.chdir(qos_path)
+            return 0
+        else:
+            print(f"{Fore.RED}Error: Package '{pkg_name}' not found.{Style.RESET_ALL}")
+            return 1
+    except FileNotFoundError:
+        print(f"{Fore.RED}Info file not found.{Style.RESET_ALL}")
+        return 1
+    except subprocess.CalledProcessError as e:
+        print(f"{Fore.RED}Error: Failed to run {pkg_name}. {e}{Style.RESET_ALL}")
+        return 1
+    except OSError as e:
+        print(f"{Fore.RED}Error: Failed to run {pkg_name}. {e}{Style.RESET_ALL}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+        return 1
+    finally:
+        os.chdir(qos_path)
 
-def install(work_dir, aargs):
-    __usage__ = "Usage: shizuku install <path>"
-    if len(aargs)!= 1:
-        print(f"{Fore.YELLOW}{__usage__}{Style.RESET_ALL}")
+def install(working_path, aargs):
+    __usage__ = "Usage: shizuku install <package_path>"
+    if not aargs or len(aargs) > 1:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
         return 1
     pkg_path = aargs[0]
-    if not os.path.isfile(os.path.join(work_dir, pkg_path)):
-        print(f"{Fore.RED}Error: {pkg_path} not found.{Style.RESET_ALL}")
-        return 1
-    pkg_file = os.path.join(work_dir, pkg_path)
-    print(Fore.CYAN + f"path: {os.path.abspath(pkg_file)}" + Style.RESET_ALL)
-    
-    while True:
-        check = input(Fore.YELLOW + "Do you want to install this package? (y/n): ").strip().lower()
-        if check == "y":
-            break
-        elif check == "n":
-            print(Fore.RED + "Operation cancelled.")
-            return 1
-        else:
-            print(Fore.RED + "Invalid input. Please enter 'y' or 'n'.")
-    
-    print(Fore.GREEN + "Installing package...")
+    # Main
+    ins_pkg_path = os.path.join(working_path, pkg_path)
+    temp_path = os.path.join(qos_path, "data", "temp", "shizuku")
+    apps_path = os.path.join(qos_path, "data", "shizuku")
+
     try:
-        destination_dir = os.path.join(qos_path, "data", "temp", "shizuku")
-        os.makedirs(destination_dir, exist_ok=True)  # 创建目录，如果已存在则忽略
-        
-        destination_path = os.path.join(destination_dir, os.path.basename(pkg_path))
-        shutil.copy(pkg_file, destination_path)
-        
-        new_name = os.path.splitext(destination_path)[0] + ".zip"
-        os.rename(destination_path, new_name)
-        
-        unzip_dir = os.path.join(qos_path, "data", "shizuku", os.path.basename(new_name)[:-4])
-        with zipfile.ZipFile(new_name, 'r') as zip_ref:
-            zip_ref.extractall(unzip_dir)
-        
-        with open(os.path.join(unzip_dir, "info.json"), "r") as f:
-            config = json.load(f)
-        
-        app_name = config["name"]
-        app_version = config["version"]
-        print(Fore.GREEN + f"Installing {app_name} {app_version}...")
-        
-        existing_app_dir = os.path.join(qos_path, "data", "shizuku", app_name)
-        if os.path.exists(existing_app_dir):
-            with open(os.path.join(existing_app_dir, "info.json"), "r") as f:
-                existing_config = json.load(f)
-            
-            existing_app_version = existing_config["version"]
-            if existing_app_version < app_version:
-                print(Fore.YELLOW + f"Found older version {existing_app_version} of {app_name}. Installing newer version {app_version}.")
-                shutil.rmtree(existing_app_dir)
-            else:
-                print(Fore.YELLOW + f"{app_name} already installed with version {existing_app_version}. No need to install again.")
-                shutil.rmtree(unzip_dir)
-                return 0
-        
-        os.rename(unzip_dir, os.path.join(qos_path, "data", "shizuku", app_name))
-        new_path_app = os.path.join(qos_path, "data", "shizuku", app_name)
-        os.rename(os.path.join(new_path_app, "main.py"), os.path.join(new_path_app, app_name + ".py"))
-        
-        print(Fore.GREEN + "Installing dependencies...")
-        try:
-            os.chdir(new_path_app)
-            subprocess.run([subprocess.sys.executable, '-m', 'pip', "install", "-r", "requirements.txt"], check=True)
-            print(Fore.GREEN + "Dependencies installed.")
-            print(Fore.GREEN + f"Package successfully installed to {new_path_app}")
-            print("="*30)
-            print(Fore.CYAN + "How to run the application:")
-            print(Fore.CYAN + f"You can just input the command 'shizuku run {app_name}' in Kom Shell.")
-            print("="*30)
-            print(Fore.GREEN + f"{app_name} {app_version} has been successfully installed.")
-            return 0
-        except subprocess.CalledProcessError:
-            print(Fore.RED + "No requirements.txt found or installation failed.")
-        except Exception as e:
-            print(Fore.RED + f"An error occurred during installing dependencies: {e}")
-        finally:
-            os.chdir(qos_path)
-            shutil.rmtree(destination_dir)
+        # Check if package exists
+        if not os.path.exists(ins_pkg_path):
+            if not os.path.exists(os.path.abspath(pkg_path)):
+                print(f"{Fore.RED}Package not found.{Fore.RESET}")
             return 1
+        if not os.path.exists(temp_path):
+            os.makedirs(temp_path)
+        if not os.path.exists(apps_path):
+            os.makedirs(apps_path)
+
+        # Extract package
+        print(f"{Fore.CYAN}Installing package...{Fore.RESET}")
+        extra_path = os.path.join(temp_path)
+        if os.path.exists(extra_path):
+            shutil.rmtree(extra_path)
+        os.makedirs(extra_path)
+        with zipfile.ZipFile(ins_pkg_path, "r") as zip_ref:
+            zip_ref.extractall(extra_path)
+    except FileNotFoundError:
+        print(f"{Fore.RED}Package file not found.{Fore.RESET}")
+        return 1
     except Exception as e:
-        print(Fore.RED + f"An error occurred: {e}")
-        os.chdir(qos_path)
-        if os.path.exists(destination_dir):
-            shutil.rmtree(destination_dir)
+        print(f"{Fore.RED}An error occurred during package check: {e}{Fore.RESET}")
         return 1
-
-
-def remove(aargs):
-    __usage__ = "Usage: shizuku remove <pkg>"
-    if len(aargs)!= 1:
-        print(f"{Fore.YELLOW}{__usage__}{Style.RESET_ALL}")
-        return 1
-    app_name = aargs[0]
-    # 打印应用名称
-    print(Fore.CYAN + f"Removing package: {app_name}")
-    # 循环提示用户是否要卸载该包，直到输入有效选项
-    while True:
-        check = str(input(Fore.YELLOW + f"Do you want to remove the package '{app_name}'? (y/n): "))
-        if check == "y" or check == "Y":
-            # 如果用户输入 'y' 或 'Y'，则跳出循环继续卸载
-            break
-        elif check == "n" or check == "N":
-            # 如果用户输入 'n' 或 'N'，则取消操作并返回状态码
-            print(Fore.RED + "Operation cancelled.")
-            return 1
-        else:
-            # 如果用户输入无效选项，则提示重新输入
-            print(Fore.RED + "Invalid input. Please enter 'y' or 'n'.")
-            continue
-    # 定义应用目录路径
-    app_dir = os.path.join(qos_path, "data", "shizuku", app_name)
-    # 检查应用目录是否存在
-    if not os.path.exists(app_dir):
-        print(Fore.RED + f"Package '{app_name}' not found. No need to remove.")
-        return 1
+    
+    # Get app name and version
     try:
-        # 删除应用目录
-        shutil.rmtree(app_dir)
-        print(Fore.GREEN + f"Package '{app_name}' has been successfully removed.")
-        # 再次添加延迟以便用户查看卸载完成信息
-        time.sleep(2)
-        # 卸载完成后返回状态码
+        with open(os.path.join(extra_path, "info.json"), "r") as app_json_f:
+            app_json = json.load(app_json_f)
+            app_name = app_json["name"]
+            app_version = app_json["version"]
+            app_vcode = app_json["vcode"]
+            app_author = app_json["author"]
+            app_desc = app_json["description"]
+            app_category = app_json["category"]
+            app_min = app_json["min_python_version"]
+            app_tar = app_json["target_python_version"]
+            app_comptb = app_json["compatible_os"]
+        while True:
+            check = str(input(f"{Fore.CYAN}Do you want to install the package '{app_name}'? (y/n): {Fore.RESET}"))
+            if check == "y" or check == "Y":
+                break
+            elif check == "n" or check == "N":
+                print(Fore.RED + "Operation cancelled." + Fore.RESET)
+                return 1
+            else:
+                print(Fore.RED + "Invalid input. Please enter 'y' or 'n'." + Fore.RESET)
+                continue
+    except KeyboardInterrupt:
+        print(Fore.RED + "Operation cancelled." + Fore.RESET)
+        shutil.rmtree(extra_path)
+        return 0
+    except FileNotFoundError:
+        print(f"{Fore.RED}File 'info.json' not found.{Fore.RESET}")
+        shutil.rmtree(extra_path)
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
+        shutil.rmtree(extra_path)
+        return 1
+
+    # Install app
+    # Check the most compatible items
+    try:
+        if app_comptb.lower() != os_type.lower():
+            print(f"{Fore.YELLOW}WARN: This app may be not compatible with your system.{Fore.RESET}")
+        if int(app_min.split(".")[1]) > int(python_ver.split(".")[1]):
+            print(f"{Fore.YELLOW}WARN: This app requires Python {app_min} or higher, but your Python version is {python_ver}.{Fore.RESET}")
+        if int(app_tar.split(".")[1]) != int(python_ver.split(".")[1]):
+            print(f"{Fore.YELLOW}WARN: This app may not work properly with your Python version.{Fore.RESET}")
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred while checking compatibility: {e}{Fore.RESET}")
+        return 1
+
+    # Check if app already exists
+    try:
+        app_dir = os.path.join(apps_path, app_name)
+        if os.path.exists(app_dir):
+            with open(os.path.join(app_dir, "info.json"), "r") as exist_app_json_f:
+                exist_app_json = json.load(exist_app_json_f)
+            # Same version, reinstall ask
+            if exist_app_json["vcode"] == app_vcode:
+                print(f"{Fore.YELLOW}Package '{app_name}' already installed. Do you want to install it again? (y/n){Fore.RESET}")
+            # Higher version, downgrade ask
+            elif exist_app_json["vcode"] > app_vcode:
+                print(f"{Fore.YELLOW}There is a newer version of package '{app_name}'. Would you like to downgrade it? (y/n){Fore.RESET}")
+            # Lower version, upgrade ask
+            elif exist_app_json["vcode"] < app_vcode:
+                print(f"{Fore.YELLOW}There is an older version of package '{app_name}'. Would you like to upgrade it? (y/n){Fore.RESET}")
+            else:
+                print(f"{Fore.RED}An error occurred while checking package '{app_name}'.{Fore.RESET}")
+                return 1
+            while True:
+                check = str(input("> "))
+                if check == "y" or check == "Y":
+                    break
+                elif check == "n" or check == "N":
+                    print(Fore.RED + "Operation cancelled." + Fore.RESET)
+                    return 0
+                else:
+                    print(Fore.RED + "Invalid input. Please enter 'y' or 'n'." + Fore.RESET)
+                    continue
+            # Remove old app directory
+            shutil.rmtree(app_dir)
+        # Copy app files to app directory
+        shutil.copytree(extra_path, app_dir)
+    except KeyboardInterrupt:
+        print(Fore.RED + "Operation cancelled." + Fore.RESET)
+        return 0
+    except FileExistsError:
+        print(f"{Fore.RED}Directory '{app_name}' already exists.{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred during package installation: {e}{Fore.RESET}")
+        return 1
+
+    # Install dependencies
+    try:
+        if os.path.isfile(os.path.join(extra_path, "requirements.txt")):
+            print(f"{Fore.CYAN}Installing dependencies...{Fore.RESET}")
+            subprocess.run([sys.executable, "-m", "pip", "install", "-r", os.path.join(extra_path, "requirements.txt")], check=True)
+        else:
+            print(f"{Fore.YELLOW}No dependencies found.{Fore.RESET}")
+    except FileNotFoundError:
+        print(f"{Fore.RED}File 'info.json' in app directory not found.{Fore.RESET}")
+        return 1
+    except KeyboardInterrupt:
+        print(Fore.RED + "Operation cancelled." + Fore.RESET)
+        return 0
+    except json.JSONDecodeError:
+        print(f"{Fore.RED}File 'info.json' format is incorrect.{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
+        return 1
+
+    # Add app to registry
+    try:
+        if not os.path.exists(os.path.join(qos_path, "data", "shizuku")):
+            os.makedirs(os.path.join(qos_path, "data", "shizuku"))
+        apps_json_path = os.path.join(qos_path, "data", "shizuku", "apps.json")
+        if os.path.exists(apps_json_path):
+            with open(apps_json_path, "r") as add_app_f:
+                add_app_config = json.load(add_app_f)
+        else:
+            add_app_config = {}
+        add_app_config[app_name] = {
+            "path": app_dir if not app_dir.startswith(qos_path) else app_dir.replace(qos_path, "."),
+            "version": app_version,
+            "version_code": app_vcode,
+            "author": app_author,
+            "description": app_desc,
+            "category": app_category,
+            "min_python_version": app_min,
+            "target_python_version": app_tar,
+            "comptb_os": app_comptb,
+        }
+        with open(apps_json_path, "w") as add_app_f:
+            json.dump(add_app_config, add_app_f, indent=4)
+        print(f"{Fore.GREEN}Package '{app_name}' has been successfully installed.{Fore.RESET}")
+    except FileNotFoundError:
+        print(f"{Fore.RED}File 'apps.json' not found.{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred during app registry update: {e}{Fore.RESET}")
+        return 1
+    
+    # Clean up
+    try:
+        shutil.rmtree(extra_path)
         return 0
     except Exception as e:
-        # 如果在删除过程中发生异常，则打印异常信息
-        print(Fore.RED + f"An error occurred during removal: {e}")
+        print(f"{Fore.RED}An error occurred during cleanup: {e}{Fore.RESET}")
         return 1
 
-def list_apps():
-    try:
-        # 打印已安装的应用列表
-        print(Fore.CYAN + "Installed packages:")
-        # 遍历 shizuku 目录下的所有应用目录
-        for app_name in os.listdir(os.path.join(qos_path, "data", "shizuku")):
-            if os.listdir(os.path.join(qos_path, "data", "shizuku", app_name)) == []:
-                print(Fore.CYAN + "No Shizuku package installed.")
+def remove(aargs):
+    __usage__ = "Usage: shizuku remove <package>"
+    if not aargs or len(aargs) > 1:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return 1
+    app_name = aargs[0]
+    # Check if app exists in registry
+    print(f"{Fore.RED}Removing package: {app_name}{Fore.RESET}")
+    # Confirm removal
+    while True:
+        try:
+            check = str(input(f"{Fore.CYAN}Do you want to remove the package '{app_name}'? (y/n): {Fore.RESET}"))
+            if check == "y" or check == "Y":
+                break
+            elif check == "n" or check == "N":
+                print(Fore.RED + "Operation cancelled." + Fore.RESET)
                 return 1
-            # 打开应用目录中的 info.json 文件以获取应用信息
-            with open(os.path.join(qos_path, "data", "shizuku", app_name, "info.json"), "r") as f:
-                config = json.load(f)
-            # 从 info.json 中读取应用名称和版本号
-            app_name = config["name"]
-            app_version = config["version"]
-            # 打印应用名称和版本号
-            print(Fore.GREEN + f"{app_name} {app_version}")
+            else:
+                print(Fore.RED + "Invalid input. Please enter 'y' or 'n'." + Fore.RESET)
+                continue
+        except KeyboardInterrupt:
+            print(Fore.RED + "Operation cancelled." + Fore.RESET)
+            return 0
+
+    # Check app registry
+    try:
+        apps_json_path = os.path.join(qos_path, "data", "shizuku", "apps.json")
+        with open(apps_json_path, "r") as add_app_f:
+            add_app_config = json.load(add_app_f)
+        if app_name in add_app_config:
+            app_dir = add_app_config[app_name]["path"]
+            if not os.path.isabs(app_dir):
+                app_dir = os.path.join(qos_path, app_dir)
+        else:
+            print(f"{Fore.YELLOW}Package '{app_name}' not found. No need to remove.{Fore.RESET}")
+            return 1
     except FileNotFoundError:
-        # 如果 shizuku 目录不存在，则提示相应信息
-        print(Fore.RED + "Error: shizuku directory not found.")
+        print(f"{Fore.RED}File 'apps.json' not found.{Fore.RESET}")
         return 1
     except Exception as e:
-        # 如果在列出过程中发生异常，则打印异常信息
-        print(Fore.RED + f"An error occurred during listing: {e}")
+        print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
+        return 1
+    
+    # Remove app directory
+    try:
+        shutil.rmtree(app_dir)
+        with open(apps_json_path, "r") as add_app_f:
+            add_app_config = json.load(add_app_f)
+        del add_app_config[app_name]
+        with open(apps_json_path, "w") as add_app_f:
+            json.dump(add_app_config, add_app_f, indent=4)
+        print(f"{Fore.GREEN}Package '{app_name}' has been successfully removed.{Fore.RESET}")
+        return 0
+    except FileNotFoundError:
+        print(f"{Fore.RED}Directory '{app_name}' not found.{Fore.RESET}")
+        return 1
+    except OSError as e:
+        print(f"{Fore.RED}An error occurred during directory removal: {e}{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred during removal: {e}{Fore.RESET}")
+        return 1
+
+def list_apps(aargs):
+    __usage__ = "Usage: shizuku list (no args)"
+    if aargs:
+        print(f"{Fore.YELLOW}{__usage__}{Fore.RESET}")
+        return 1
+    # Main
+    try:
+        apps_json_path = os.path.join(qos_path, "data", "shizuku", "apps.json")
+        if os.path.exists(apps_json_path):
+            with open(apps_json_path) as add_app_f:
+                add_app_config = json.load(add_app_f)
+        else:
+            add_app_config = {}
+        if len(add_app_config) == 0:
+            print(f"{Fore.YELLOW}No packages installed.{Fore.RESET}")
+            return 1
+        else:
+            all_app_list = {**add_app_config}
+            print(f"{Fore.GREEN}Installed packages:{Fore.RESET}")
+            print(f"{Fore.CYAN}[Name]{Fore.RESET} - {Fore.GREEN}[Version]{Fore.RESET} - {Fore.LIGHTBLUE_EX}[Author]{Fore.RESET} - {Fore.YELLOW}[Category]{Fore.RESET} - {Fore.LIGHTMAGENTA_EX}[Description]{Style.RESET_ALL}")
+            for app_name in all_app_list:
+                app_version = all_app_list[app_name]["version"]
+                app_author = all_app_list[app_name]["author"]
+                app_desc = all_app_list[app_name]["description"]
+                app_category = all_app_list[app_name]["category"]
+                print(f"{Fore.CYAN}{app_name}{Fore.RESET} - {Fore.GREEN}{app_version}{Fore.RESET} - {Fore.LIGHTBLUE_EX}{app_author}{Fore.RESET} - {Fore.YELLOW}{app_category}{Fore.RESET} - {Fore.LIGHTMAGENTA_EX}{app_desc}{Fore.RESET}")
+            return 0
+    except FileNotFoundError:
+        print(f"{Fore.RED}File 'apps.json' not found.\n{Fore.CYAN}Looks like you haven't installed any packages yet.{Fore.RESET}")
+        return 1
+    except Exception as e:
+        print(f"{Fore.RED}An error occurred: {e}{Fore.RESET}")
         return 1

@@ -119,13 +119,15 @@ def remove(backup_file=None):
     try:
         if backup_file is None:
             backup_list = list_all()
-            if backup_list is None:
+            if backup_list == 0:
                 print(f"{Fore.LIGHTGREEN_EX}No backup file need to be removed.{Style.RESET_ALL}")
                 return 0
             while True:
                 print(f"{Fore.YELLOW}Please select a backup to remove (0 to exit):{Style.RESET_ALL}")
                 option = input("> ")
-                if option.isdigit() and int(option) > 0 and int(option) <= len(backup_list):
+                if option == "0":
+                    return 0
+                elif option.isdigit() and int(option) > 0 and int(option) <= len(backup_list):
                     will_remove = backup_list[int(option) - 1]
                     break
                 else:

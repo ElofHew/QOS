@@ -13,7 +13,7 @@ import subprocess
 cinit(autoreset=True)
 
 try:
-    with open("data/config/config.json", "r") as config_file:
+    with open(os.path.join("data", "config", "config.json"), "r") as config_file:
         config = json.load(config_file)
         os_type = config.get("os_type", "")
         last_login = config.get("last_login", "")
