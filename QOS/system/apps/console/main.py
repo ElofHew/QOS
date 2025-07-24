@@ -16,12 +16,7 @@ def main():
     try:
         print(f"{Fore.GREEN}Quarter OS Python Console{Style.RESET_ALL}")
         print(f"{Fore.YELLOW}Type 'exit()' to exit the console.{Style.RESET_ALL}")
-        if platform.system() == "Windows":
-            python_process = subprocess.Popen(["python"], shell=True)
-        else:
-            python_process = subprocess.Popen(["python3"], shell=True)
-        python_process.wait()
-        python_process.kill()
+        subprocess.run([sys.executable])
     except KeyboardInterrupt:
         if not keyboard_interrupt_caught:
             print(f"{Fore.RED}KeyboardInterrupt: Exiting console.{Style.RESET_ALL}")

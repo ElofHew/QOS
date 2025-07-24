@@ -87,8 +87,7 @@ if __name__ == "__main__":
         import time
         import subprocess
         while True:
-            process = subprocess.Popen([sys.executable, os.path.join(work_path, "system", "main.py"), "--boot", "--regular"], shell=True)
-            process.wait()
+            process = subprocess.run([sys.executable, os.path.join(work_path, "system", "main.py"), "--boot", "--regular"])
             qos_return_code = process.returncode
             match qos_return_code:
                 case 0:

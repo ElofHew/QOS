@@ -80,8 +80,7 @@ def run(aargs):
         if os.path.isfile(app_main_path) and app_main.endswith(".py"):
             try:
                 os.chdir(app_dir_path)
-                szk_process = subprocess.Popen([subprocess.sys.executable, app_main_path])
-                szk_process.wait()
+                szk_process = subprocess.run([subprocess.sys.executable, app_main_path])
                 if szk_process.returncode != 0:
                     print(f"{Fore.RED}Error: subprocess returned {szk_process.returncode}{Style.RESET_ALL}")
                     return

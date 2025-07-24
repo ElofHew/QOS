@@ -19,7 +19,7 @@ def run_system_kits(command, args=[]):
         filename = command + ".py"
         if os.path.isfile(os.path.join(qos_path, "system", "kits", filename)):
             current_script_path = os.path.join(qos_path, "system", "kits", filename)
-            kitproc = subprocess.run([sys.executable, current_script_path] + args, shell=True)
+            kitproc = subprocess.run([sys.executable, current_script_path] + args)
             if kitproc.returncode != 0:
                 print(f"{Fore.YELLOW}Warning: Return code: {kitproc.returncode}{Style.RESET_ALL}")
             return kitproc.returncode
@@ -45,8 +45,7 @@ def ucprogress(working_path, shell_command, args=[]):
         boot_string = str(shell_command)
         boot_args = args if args else []
         os.chdir(working_path)
-        process = subprocess.Popen([boot_string] + boot_args, shell=True)
-        process.wait()
+        process = subprocess.run([boot_string] + boot_args)
         if process.returncode != 0:
             print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
         process.kill()
@@ -87,8 +86,7 @@ def run_3rd_party_apps(working_path, shell_command, args=[]):
             boot_args = args if args else []
             # Run app
             os.chdir(app_path)
-            process = subprocess.Popen([sys.executable, boot_string] + boot_args, shell=True)
-            process.wait()
+            process = subprocess.run([sys.executable, boot_string] + boot_args)
             if process.returncode != 0:
                 print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
             process.kill()
@@ -134,8 +132,7 @@ def run_sys_apps(working_path, shell_command, args=[]):
             boot_args = args if args else []
             # Run app
             os.chdir(app_path)
-            process = subprocess.Popen([sys.executable, boot_string] + boot_args, shell=True)
-            process.wait()
+            process = subprocess.run([sys.executable, boot_string] + boot_args)
             if process.returncode != 0:
                 print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
             process.kill()
@@ -172,8 +169,7 @@ def run_local_prog(working_path, shell_command, args=[]):
         # Process arguments
         boot_args = args if args else []
         os.chdir(working_path)
-        process = subprocess.Popen([sys.executable, boot_string] + boot_args, shell=True)
-        process.wait()
+        process = subprocess.run([sys.executable, boot_string] + boot_args)
         if process.returncode != 0:
             print(f"{Fore.YELLOW}WARNING: This app returned a code: {process.returncode}.{Style.RESET_ALL}")
         process.kill()
