@@ -183,6 +183,6 @@ rm -rf qosvenv
 
 Written by [ElofHew](https://github.com/ElofHew).
 
-&copy; 2025 [Oak Studio](https://t.me/oakstdcn). All rights reserved.
+&copy; 2025 [Oak Studio](https://os.drevan.xyz/). All rights reserved.
 
 </div>

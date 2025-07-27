@@ -27,10 +27,10 @@ try:
     biscuit_ver = "1.0"
 except FileNotFoundError:
     print(f"{Fore.RED}Config file not found.{Fore.RESET}")
-    sys.exit(0)
+    sys.exit(19)
 except json.JSONDecodeError:
     print(f"{Fore.RED}Config file is not a valid JSON file.{Fore.RESET}")
-    sys.exit(0)
+    sys.exit(19)
 
 def main(working_path, args):
     try:

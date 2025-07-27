@@ -26,11 +26,11 @@
 
 在OOBE中，直接输入激活码并回车，即可完成激活。
 
-若是在终端下，只需要输入 `activate <激活码>` 命令，回车即可完成激活。
+若是在终端下，只需要输入 `activate -a <激活码>` 命令，回车即可完成激活。
 
 ## 3.检验激活状态
 
-在KomShell中，输入 `activate check` 命令，即可查看当前激活状态。
+在KomShell中，输入 `activate -ck` 命令，即可查看当前激活状态。
 
 ## 4.激活作用
 
@@ -48,6 +48,6 @@
 
 Written by [ElofHew](https://github.com/ElofHew)
 
-&copy; 2025 Oak Studio. All rights reserved.
+&copy; 2025 [Oak Studio](https://os.drevan.xyz/). All rights reserved.
 
 </div>

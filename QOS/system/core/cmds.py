@@ -26,13 +26,13 @@ try:
         activate_statue = config.get("activate_statue", "")
 except FileNotFoundError:
     print(f"{Fore.RED}Error: Config file not found.{Style.RESET_ALL}")
-    sys.exit(0)
+    sys.exit(19)
 except json.JSONDecodeError:
     print(f"{Fore.RED}Error: Config file is not in JSON format.{Style.RESET_ALL}")
-    sys.exit(0)
+    sys.exit(19)
 except Exception as e:
     print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
-    sys.exit(0)
+    sys.exit(19)
 
 # Need Args
 def cat(work_dir, args):
@@ -573,7 +573,7 @@ def exit(working_dir=None, args=None):
         except KeyboardInterrupt:
             print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
             clear()
-            sys.exit(0)
+            sys.exit(17)
 
 def reboot(working_dir=None, args=None):
     print(f"{Fore.CYAN}Are you sure you want to reboot? (y/n){Style.RESET_ALL}")
@@ -582,7 +582,7 @@ def reboot(working_dir=None, args=None):
             reboot_cfm = input("> ").strip().lower()
             if reboot_cfm == "y":
                 clear()
-                sys.exit(1)
+                sys.exit(11)
             elif reboot_cfm == "n":
                 return False
             else:
@@ -590,4 +590,4 @@ def reboot(working_dir=None, args=None):
         except KeyboardInterrupt:
             print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
             clear()
-            sys.exit(0)
+            sys.exit(17)

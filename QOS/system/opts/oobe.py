@@ -47,24 +47,56 @@ class OOBE:
         system_name = login.make_system_name()
         if system_name == 10:
             print(f"{Fore.RED}Error: Keyboard interrupt detected.{Style.RESET_ALL}")
-            sys.exit(0)
+            sys.exit(17)
         if system_name:
             print(f"{Fore.LIGHTGREEN_EX}Your system name is {Fore.LIGHTBLUE_EX}{system_name}{Style.RESET_ALL}")
 
     # Add User Account
     def add_user_account(self):
+        user_data = {
+            "user1": {
+                "username": "root",
+                "password": "MTIzNDU2"
+            },
+            "user2": {
+                "username": "admin",
+                "password": "MTIzNDU2"
+            },
+            "user3": {
+                "username": "guest",
+                "password": None
+            }
+        }
+        try:
+            with open('data/config/users.json', 'r') as user_file:
+                user_data_old = json.load(user_file)
+            # 检查 user_data_old 是否包含预期的键和用户名
+            if len(user_data_old) <= 3 and \
+               user_data_old.get("user1", {}).get("username") != "root" or \
+               user_data_old.get("user2", {}).get("username") != "admin" or \
+               user_data_old.get("user3", {}).get("username") != "guest":
+                with open('data/config/users.json', 'w') as user_file:
+                    json.dump(user_data, user_file, indent=4)
+            else:
+                # 如果不符合预期格式，直接覆盖
+                with open('data/config/users.json', 'w') as user_file:
+                    json.dump(user_data, user_file, indent=4)
+        except (FileNotFoundError, json.JSONDecodeError):
+            # 如果文件不存在或内容不是有效的 JSON，创建新文件
+            with open('data/config/users.json', 'w') as user_file:
+                json.dump(user_data, user_file, indent=4)
         # Set Default User Account
         print(f"{Fore.LIGHTGREEN_EX}Who will use QOS? \n{Fore.LIGHTBLUE_EX}(Enter a default user name in 10 characters or less, and use only lowercase letters, numbers, and '_'.){Style.RESET_ALL}")
         default_user = login.confirm_username()
         if default_user == 10:
             print(f"{Fore.RED}Error: Keyboard interrupt detected.{Style.RESET_ALL}")
-            sys.exit(0)
+            sys.exit(17)
         # Set New User Account
         print(f"{Fore.LIGHTGREEN_EX}Please set a password for your account.\n{Fore.LIGHTBLUE_EX}(Enter a password in 8 characters or less, and don't use spaces.){Style.RESET_ALL}")
         user_password = login.confirm_password()
         if user_password == 10:
             print(f"{Fore.RED}Error: Keyboard interrupt detected.{Style.RESET_ALL}")
-            sys.exit(0)
+            sys.exit(17)
         # Write User Account to users.json
         print(f"{Fore.LIGHTGREEN_EX}Creating user account...\n{Style.RESET_ALL}")
         create_condition = login.confirm_user_account(default_user, user_password)

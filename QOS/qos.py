@@ -93,17 +93,21 @@ if __name__ == "__main__":
                 case 0:
                     # 0: 正常退出(关机)
                     break
-                case 1:
+                case 11:
                     # 1: 重新运行(重启)
                     time.sleep(1)
                     continue
-                case 2:
+                case 12:
                     # 2: 暂未开发但已预留的启动项
                     print("Error: This feature is not yet developed.")
                     break
-                case 3:
+                case 16:
                     # 3: 启动参数不正确
                     print("Error: Invalid startup parameters.")
+                    break
+                case 19:
+                    # 4: 捕捉到错误
+                    print("Error: Something went wrong.")
                     break
                 case _:
                     # 其他值: 未知错误

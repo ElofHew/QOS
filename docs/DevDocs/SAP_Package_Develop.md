@@ -199,6 +199,6 @@ PY OS Improved 第三方软件开发规范仅供参考，开发者可以根据�
 
 Written by [ElofHew](https://github.com/ElofHew)
 
-&copy; 2025 [Oak Studio](https://t.me/oakstdcn). All rights reserved.
+&copy; 2025 [Oak Studio](https://os.drevan.xyz/). All rights reserved.
 
 </div>

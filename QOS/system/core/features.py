@@ -4,9 +4,14 @@ import platform
 import json
 import time
 import random
-import requests
 import pathlib
 from colorama import Fore, Style, init
+
+try:
+    import requests
+except ImportError:
+    print(f"{Fore.RED}Error: Failed to import requests module. Please install it by running 'pip install requests' in your command prompt.{Style.RESET_ALL}")
+    sys.exit(19)
 
 init(autoreset=True)
 
@@ -72,7 +77,7 @@ def d_exit():
     sys.exit(0)
 
 def d_restart():
-    sys.exit(1)
+    sys.exit(11)
 
 def cat(file_path):
     txt_path = pathlib.Path(file_path)

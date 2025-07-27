@@ -37,45 +37,46 @@ init(autoreset=True)
 """
 
 api_base_url = "https://api.seniverse.com/v3/weather/now.json"
+api_key = "?key=SuxDBDRWbZgAZMUmM"
 
 weather_config_path = os.path.join("..", "..", "..", "data", "data", "weather")
 weather_config_file = os.path.join(weather_config_path, "weather.json")
+
+def get_user_settings():
+    while True:
+        city = input(f"{Fore.GREEN}Please enter your preferred city: {Fore.RESET}").strip().lower()
+        unit = input(f"{Fore.GREEN}Please enter your preferred unit (c/f): {Fore.RESET}").strip().lower()
+        if unit not in ['c', 'f']:
+            print(f"{Fore.RED}Invalid unit. Please try again.{Fore.RESET}")
+            continue
+        language = input(f"{Fore.GREEN}Please enter your preferred language (zh/en): {Fore.RESET}").strip().lower()
+        if language not in ['zh', 'en']:
+            print(f"{Fore.RED}Invalid language. Please try again.{Fore.RESET}")
+            continue
+        return city, unit, language
 
 def get_weather_settings():
     global c_city, c_unit, c_language
     try:
         if not os.path.exists(weather_config_path):
             os.makedirs(weather_config_path)
+
         if os.path.exists(weather_config_file):
             with open(weather_config_file, "r") as f:
                 config = json.load(f)
                 c_city = config["city"]
                 c_unit = config["unit"]
                 c_language = config["lang"]
-            # Print Current Weather Settings
             print(f"{Fore.GREEN}Current Weather Settings{Style.RESET_ALL}")
             print(f"{Fore.CYAN}City: {Fore.LIGHTGREEN_EX}{c_city}{Fore.RESET}")
             print(f"{Fore.CYAN}Unit: {Fore.LIGHTGREEN_EX}{c_unit}{Fore.RESET}")
             print(f"{Fore.CYAN}Language: {Fore.LIGHTGREEN_EX}{c_language}{Fore.RESET}")
             input("(Press Enter to edit...)")
-        city = input(f"{Fore.GREEN}Please enter your preferred city: {Fore.RESET}")
-        city = city.replace(" ", "").lower()
-        while True:
-            unit = input(f"{Fore.GREEN}Please enter your preferred unit (c/f): {Fore.RESET}")
-            if unit.lower() == "c" or unit.lower() == "f":
-                unit = unit.lower()
-                break
-            else:
-                print(f"{Fore.RED}Invalid unit. Please try again.{Fore.RESET}")
-                continue
-        while True:
-            language = input(f"{Fore.GREEN}Please enter your preferred language (zh/en): {Fore.RESET}")
-            if language.lower() == "zh" or language.lower() == "en":
-                language = language.lower()
-                break
-            else:
-                print(f"{Fore.RED}Invalid language. Please try again.{Fore.RESET}")
-                continue
+        else:
+            print(f"{Fore.YELLOW}WARNING: Weather settings file not found. Please set up first.{Fore.RESET}")
+
+        city, unit, language = get_user_settings()
+
         weather_config = {
             "city": city,
             "unit": unit,
@@ -86,11 +87,12 @@ def get_weather_settings():
         c_city = city
         c_unit = unit
         c_language = language
+        print()
         print(f"{Fore.GREEN}Weather Settings Updated{Style.RESET_ALL}")
         print(f"{Fore.CYAN}City: {Fore.LIGHTGREEN_EX}{c_city}{Fore.RESET}")
         print(f"{Fore.CYAN}Unit: {Fore.LIGHTGREEN_EX}{c_unit}{Fore.RESET}")
         print(f"{Fore.CYAN}Language: {Fore.LIGHTGREEN_EX}{c_language}{Fore.RESET}")
-        return 0
+        return c_city, c_unit, c_language
     except KeyboardInterrupt:
         return 0
     except Exception as e:
@@ -103,18 +105,21 @@ def get_weather(city, unit, language):
         language = "zh-Hans"
     else:
         language = "en-US"
-    api_key = "?key=" + "SuxDBDRWbZgAZMUmM"
     api_unit = "&unit=" + unit
     api_language = "&language=" + language
     api_location = "&location=" + city
     http_url = api_base_url + api_key + api_unit + api_language + api_location
+
     try:
         # Send HTTP request and get JSON data
-        weather_get = requests.get(http_url).json()
+        response = requests.get(http_url, timeout=5)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+        weather_data = response.json()
+
         # Check if API Key is valid
-        if weather_get.get("results"):
+        if weather_data.get("results"):
             # Extract Weather Data
-            weather_dict = weather_get['results'][0]
+            weather_dict = weather_data['results'][0]
             # Parse Weather Data
             location_name = weather_dict['location']['name']
             time_zone = weather_dict['location']['timezone']
@@ -129,68 +134,69 @@ def get_weather(city, unit, language):
             print(f'{Fore.GREEN}Temperature: {Fore.CYAN}{temperature}{Fore.RESET}')
             print(f'{Fore.GREEN}Last Update: {Fore.CYAN}{last_update}{Fore.RESET}')
             print(Fore.LIGHTMAGENTA_EX + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + Fore.RESET)
-            input(f"{Fore.LIGHTGREEN_EX}(Press Enter to continue...){Fore.RESET}")
-        elif weather_get.status_code == 403:
-            print(Fore.RED + "API Key access failed." + Fore.RESET)
-        elif weather_get.status_code == 404:
-            print(Fore.RED + "API Key not found." + Fore.RESET)
-        elif weather_get.status_code == 500:
-            print(Fore.RED + "Server internal error." + Fore.RESET)
+            return 0
         else:
             print(Fore.YELLOW + "Unable to retrieve weather data. Please check API URL and parameters." + Fore.RESET)
-    except requests.exceptions.RequestException as e:
-        print(f"{Fore.RED}HTTP request error: {e}{Fore.RESET}")
-    except json.JSONDecodeError as e:
-        print(f"{Fore.RED}JSON decode error: {e}{Fore.RESET}")
+            return 1
+    except requests.exceptions.HTTPError as http_err:
+        if response.status_code == 403:
+            print(Fore.RED + "API Key access failed." + Fore.RESET)
+        elif response.status_code == 404:
+            print(Fore.RED + "API Key not found." + Fore.RESET)
+        elif response.status_code == 500:
+            print(Fore.RED + "Server internal error." + Fore.RESET)
+        else:
+            print(f"{Fore.RED}HTTP request error: {http_err}{Fore.RESET}")
+        return 1
+    except requests.exceptions.Timeout as timeout_err:
+        print(f"{Fore.RED}Timeout error: {timeout_err}{Fore.RESET}")
+        return 1
+    except requests.exceptions.RequestException as err:
+        print(f"{Fore.RED}Request error: {err}{Fore.RESET}")
+        return 1
+    except json.JSONDecodeError as json_err:
+        print(f"{Fore.RED}JSON decode error: {json_err}{Fore.RESET}")
+        return 1
     except Exception as e:
         print(f"{Fore.RED}Error occurred: {e}{Fore.RESET}")
+        return 1
 
 def app_once():
-    city = input(f"{Fore.GREEN}Please enter your preferred city: {Fore.RESET}")
-    city = city.replace(" ", "").lower()
-    while True:
-        unit = input(f"{Fore.GREEN}Please enter your preferred unit (c/f): {Fore.RESET}")
-        if unit.lower() == "c" or unit.lower() == "f":
-            unit = unit.lower()
-            break
-        else:
-            print(f"{Fore.RED}Invalid unit. Please try again.{Fore.RESET}")
-            continue
-    while True:
-        language = input(f"{Fore.GREEN}Please enter your preferred language (zh/en): {Fore.RESET}")
-        if language.lower() == "zh" or language.lower() == "en":
-            language = language.lower()
-            break
-        else:
-            print(f"{Fore.RED}Invalid language. Please try again.{Fore.RESET}")
-            continue
+    city, unit, language = get_user_settings()
     get_weather(city, unit, language)
+    input("(Press Enter to continue...)")
 
 def app():
     try:
-        with open (weather_config_file, "r") as f:
+        with open(weather_config_file, "r") as f:
             config = json.load(f)
+            city = config["city"]
             unit = config["unit"]
             language = config["lang"]
-            location = config["city"]
-        get_weather(location, unit, language)
+        get_weather(city, unit, language)
+        input("(Press Enter to continue...)")
     except FileNotFoundError:
-        print(f"{Fore.YELLOW}WARNING: Weather settings file not found. Please set up first.{Fore.RESET}")
         get_weather_settings()
     except Exception as e:
         print(f"{Fore.RED}Error occurred: {e}{Fore.RESET}")
 
 def main():
+    if sys.argv[1:]:
+        return_code = get_weather(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "c", sys.argv[3] if len(sys.argv) > 3 else "zh")
+        sys.exit(return_code)
+    # Main UI
     while True:
         if platform.system() == "Windows":
             os.system("cls")
         else:
             os.system("clear")
+
         print(Fore.GREEN + "Quarter OS Weather App" + Style.RESET_ALL)
         print(Fore.CYAN + "1. Get Weather" + Fore.RESET)
         print(Fore.CYAN + "2. Get Weather in Once" + Fore.RESET)
         print(Fore.CYAN + "3. Settings" + Fore.RESET)
         print(Fore.CYAN + "4. Exit" + Fore.RESET)
+
         try:
             choice = int(input("> "))
             if choice == 1:
@@ -199,6 +205,7 @@ def main():
                 app_once()
             elif choice == 3:
                 get_weather_settings()
+                input("(Press Enter to continue...)")
             elif choice == 4:
                 break
             else:

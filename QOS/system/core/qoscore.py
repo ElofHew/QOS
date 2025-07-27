@@ -5,18 +5,6 @@ import json
 import platform
 import pathlib
 
-def get_locale():
-    """
-    Get the system locale.
-    Returns:
-        str: The system locale in the format 'language_COUNTRY'.
-    """
-    try:
-        return os.environ.get('LANG', 'en_US').split('.')[0]
-    except Exception as e:
-        print(f"Error getting locale: {e}")
-        return 'en_US'
-
 def check_home_dir():
     user_file_path = pathlib.Path("data/config/users.json")
     if not user_file_path.exists():
@@ -56,11 +44,14 @@ def check_config_dir():
         data_config_dir = os.path.join(os.getcwd(), "data", "config")
         if not os.path.exists(os.path.join(data_config_dir, "config.json")):
             qos_config_data = {
-                "os_type": "windows",
+                "name": "Quarter OS",
                 "version": "Alpha 0.2.2",
+                "vercode": "0220",
+                "os_type": None,
                 "qos_path": None,
                 "startup_title": "QOS Alpha 0.2.2",
                 "qos_startup_logo": "1",
+                "startup_timeout": 3,
                 "system_name": None,
                 "oobe": True,
                 "biscuit_repo": "https://os.drevan.xyz/biscuit/repo/",
@@ -71,7 +62,7 @@ def check_config_dir():
                 "data_path": None,
                 "home_path": None,
                 "system_path": None,
-                "shell_theme": "1",
+                "shell_theme": "default",
                 "unknown_command_progression": False,
                 "last_login": None,
                 "last_login_time": None
@@ -125,6 +116,56 @@ def check_more_dir():
         print(f"An error occurred: {e}")
         return False
 
+def check_full_json():
+    default_config = {
+        "name": "Quarter OS",
+        "version": "Alpha 0.2.2",
+        "vercode": "0220",
+        "os_type": None,
+        "qos_path": None,
+        "startup_title": "QOS Alpha 0.2.2",
+        "qos_startup_logo": "1",
+        "startup_timeout": 3,
+        "system_name": None,
+        "oobe": True,
+        "biscuit_repo": "https://os.drevan.xyz/biscuit/repo/",
+        "qos_edition": None,
+        "activate_code": None,
+        "activate_statue": False,
+        "ad_statue": True,
+        "data_path": None,
+        "home_path": None,
+        "system_path": None,
+        "shell_theme": "default",
+        "unknown_command_progression": False,
+        "last_login": None,
+        "last_login_time": None
+    }
+    config_path = "data/config/config.json"
+    try:
+        # 检查文件是否存在，如果不存在则创建并写入默认配置
+        if not os.path.exists(config_path):
+            with open(config_path, "w") as qos_config_file:
+                json.dump(default_config, qos_config_file, indent=4)
+            return True
+        with open(config_path, "r+") as qos_config_file:  # 修正这里
+            config_data = json.load(qos_config_file)
+            modified = False
+            # 检查并更新默认值
+            for key, value in default_config.items():
+                if key not in config_data:
+                    config_data[key] = value
+                    modified = True
+            # 只有在配置有修改时才写入文件
+            if modified:
+                qos_config_file.seek(0)  # 将文件指针移到文件开头
+                json.dump(config_data, qos_config_file, indent=4)
+                qos_config_file.truncate()  # 截断文件以去除多余内容
+            return True
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False
+
 def check_os_path():
     try:
         with open("data/config/config.json", "r") as qos_config_file:
@@ -141,13 +182,13 @@ def check_os_path():
         home_path = os.path.join(qos_path, "home")
         system_path = os.path.join(qos_path, "system")
         # div
-        json_os_type = os_mapping.get(detected_os, "unknown")
+        json_os_type = config_data.get("os_type", "")
         json_qos_path = config_data.get("qos_path", "")
         json_data_path = config_data.get("data_path", "")
         json_home_path = config_data.get("home_path", "")
         json_system_path = config_data.get("system_path", "")
-        if config_data.get("os_type", "").lower() != json_os_type:
-            config_data["os_type"] = json_os_type
+        if json_os_type != detected_os:
+            config_data["os_type"] = detected_os
         if json_qos_path != qos_path:
             config_data["qos_path"] = qos_path
         if json_data_path != data_path:

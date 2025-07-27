@@ -17,11 +17,11 @@ def qos_login():
     except FileNotFoundError:
         print(Fore.RED + "File 'users.json' not found, please check the file path." + Style.RESET_ALL)
         features.clear()
-        sys.exit(0)
+        sys.exit(19)
     except json.JSONDecodeError:
         print(Fore.RED + "File 'users.json' is not a valid JSON file." + Style.RESET_ALL)
         features.clear()
-        sys.exit(0)
+        sys.exit(19)
     while True:
         try:
             print(f"{Fore.LIGHTGREEN_EX}Enter a user name to login: {Style.RESET_ALL}")
@@ -84,34 +84,30 @@ def qos_login():
         except KeyboardInterrupt:
             print(f"{Style.DIM}{Fore.YELLOW}\nKeyboardInterrupt detected. Exiting...{Style.RESET_ALL}")
             features.clear()
-            sys.exit(0)
+            sys.exit(17)
         except EOFError:
             print(f"{Style.DIM}{Fore.YELLOW}\nEOF detected. Exiting...{Style.RESET_ALL}")
             features.clear()
-            sys.exit(0)
+            sys.exit(19)
         except Exception as e:
             print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
             features.clear()
-            sys.exit(0)
+            sys.exit(19)
 
-def main(version, startup_title):
+def main(version):
     print(Style.DIM + Fore.YELLOW + "Quarter OS Login Manager - " + version + Style.RESET_ALL + "\n")
     try:
         username = qos_login()
     except KeyboardInterrupt:
         print(f"{Fore.YELLOW}(KeyboardInterrupt){Style.RESET_ALL}")
-        sys.exit(0)
+        sys.exit(17)
     with open(os.path.join("data", "config", "config.json"), "r") as qos_config_file:
         config_data = json.load(qos_config_file)
     config_data["last_login"] = username
     with open(os.path.join("data", "config", "config.json"), "w") as qos_config_file:
         json.dump(config_data, qos_config_file, indent=4)
-    print(" " + Fore.LIGHTBLUE_EX + str(startup_title) + Style.RESET_ALL + " ")
-    tm.sleep(1)
-    print(f"\n{Fore.GREEN}QOS will start in 3 seconds...{Style.RESET_ALL}")
-    tm.sleep(3)
     if username:
         return username
     else:
         print(f"{Fore.RED}Error: Some wrong with Login Manager!{Style.RESET_ALL}")
-        sys.exit(0)
+        sys.exit(19)

@@ -6,8 +6,7 @@ try:
     import json
     import shlex
     import time
-    import pathlib
-    from platform import system as pfs
+    from pathlib import Path
     # Third-party modules
     from colorama import init as cinit
     from colorama import Fore, Style, Back
@@ -17,46 +16,44 @@ try:
     from system.core.features import get_ads
 except ImportError as e:
     print(f"Error: {e}")
-    sys.exit(0)
+    sys.exit(19)
 
 cinit(autoreset=True)
 
 # Open config files
 try:
-    with open('data/config/config.json', 'r') as config_file:
+    with open(Path("data/config/config.json"), 'r') as config_file:
         config = json.load(config_file)
-    version = config.get("version", "?")
-    os_type = config.get("os_type", pfs().lower())
-    qos_path = config.get("qos_path", os.getcwd())
-    home_path = config.get("home_path", os.path.join(os.getcwd(), "home"))
+    version = config.get("version")
+    os_type = config.get("os_type")
+    qos_path = config.get("qos_path")
+    home_path = config.get("home_path")
 except FileNotFoundError:
     print(f"{Fore.RED}Error: {Style.RESET_ALL}'config.json' not found.")
-    sys.exit(0)
+    sys.exit(19)
 except json.JSONDecodeError:
     print(f"{Fore.RED}Error: {Style.RESET_ALL}'config.json' is not valid JSON.")
-    sys.exit(0)
+    sys.exit(19)
 except Exception as e:
     print(f"{Fore.RED}Error: {Style.RESET_ALL}{e}")
-    sys.exit(0)
+    sys.exit(19)
 
-def main(username):
+def main(username="user"):
     print(f"{Style.DIM}{Fore.YELLOW}Kom Shell for QOS - {version}{Style.RESET_ALL}\n")
     # Initialize home directory
     default_path = os.path.join(home_path, username)
     # Initialize working directory
     working_path = default_path
-    # Initialize user directory
-    user_path = os.path.join(home_path, username)
     # Initialize supported commands
     try:
         with open(os.path.join(qos_path, "system", "shell", "cmds.json"), "r") as supported_cmds_file:
             supported_cmds = json.load(supported_cmds_file)
     except FileNotFoundError:
         print(f"{Fore.RED}Error: {Style.RESET_ALL}'cmds.json' not found.")
-        sys.exit(0)
+        sys.exit(19)
     except Exception as e:
         print(f"{Fore.RED}Error: {Style.RESET_ALL}{e}")
-        sys.exit(0)
+        sys.exit(19)
     # Get ADs
     get_ads()
     # Start shell loop
@@ -66,7 +63,7 @@ def main(username):
             if working_path == default_path:
                 tip_path = "~"
             elif working_path.startswith(default_path):
-                tip_path = "~ " + str(pathlib.Path(working_path).relative_to(os.path.join(home_path, username)))
+                tip_path = "~ " + str(Path(working_path).relative_to(os.path.join(home_path, username)))
             else:
                 tip_path = working_path
             # Get user input
@@ -112,4 +109,4 @@ def main(username):
             continue
         except Exception as e:
             print(f"Error: {e}")
-            sys.exit(0)
+            sys.exit(19)
