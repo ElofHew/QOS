@@ -45,6 +45,7 @@ def check_config_dir():
         if not os.path.exists(os.path.join(data_config_dir, "config.json")):
             qos_config_data = {
                 "name": "Quarter OS",
+                "ename": "QOS",
                 "version": "Alpha 0.2.2",
                 "vercode": "0220",
                 "os_type": None,
@@ -62,7 +63,7 @@ def check_config_dir():
                 "data_path": None,
                 "home_path": None,
                 "system_path": None,
-                "shell_theme": "default",
+                "theme": "default",
                 "unknown_command_progression": False,
                 "last_login": None,
                 "last_login_time": None
@@ -119,6 +120,7 @@ def check_more_dir():
 def check_full_json():
     default_config = {
         "name": "Quarter OS",
+        "ename": "QOS",
         "version": "Alpha 0.2.2",
         "vercode": "0220",
         "os_type": None,
@@ -136,7 +138,7 @@ def check_full_json():
         "data_path": None,
         "home_path": None,
         "system_path": None,
-        "shell_theme": "default",
+        "theme": "default",
         "unknown_command_progression": False,
         "last_login": None,
         "last_login_time": None

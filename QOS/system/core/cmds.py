@@ -556,7 +556,7 @@ def clear(working_dir=None, args=None):
         print(f"{Fore.RED}Error: Unsupported OS.{Style.RESET_ALL}")
 
 def eula(working_dir=None, args=None):
-    cat("system/etc/eula.txt")
+    cat(qos_path, ["system/etc/eula.txt"])
 
 def exit(working_dir=None, args=None):
     print(f"{Fore.CYAN}Are you sure you want to exit? (y/n){Style.RESET_ALL}")
