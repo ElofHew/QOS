@@ -5,9 +5,9 @@
 qosvenv/
 
 # QOS Data Dir
-QOS/data/
-QOS/home/
-QOS/backup/
+data/
+home/
+backup/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

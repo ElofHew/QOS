@@ -2,8 +2,8 @@
 """
 # QOS - Quarter Operation System
 @ Author: ElofHew aka Dan_Evan
-@ Version: Alpha 0.2
-@ Date: 2025-06-29
+@ Version: Alpha 0.2.2
+@ Date: 2025-08-02
 @ License: GNU General Public License v3.0
 @ Description: A Professional Fake-OS Powered by Python3.
 """
@@ -13,15 +13,9 @@ try:
     import os, sys, colorama
     now_path = os.getcwd()
     if not os.path.isfile(os.path.join(now_path, 'qos.py')):
-        if now_path.endswith('QOS'):
-            raise FileNotFoundError(f"{colorama.Fore.RED}No such file: 'qos.py' in this directory.\n{colorama.Fore.CYAN}(Maybe you should 'cd QOS' at this directory first?){colorama.Fore.RESET}")
-        else:
-            raise FileNotFoundError(f"{colorama.Fore.RED}No such file: 'qos.py' in this directory.{colorama.Fore.RESET}")
+        raise FileNotFoundError(f"{colorama.Fore.RED}No such file: 'qos.py' in this directory.{colorama.Fore.RESET}")
     if not os.path.isdir(os.path.join(now_path, 'system')):
-        if now_path.endswith('QOS'):
-            raise NotADirectoryError(f"{colorama.Fore.RED}No such directory:'system' in this directory.\n{colorama.Fore.CYAN}(Maybe you should 'cd QOS' at this directory first?){colorama.Fore.RESET}")
-        else:
-            raise NotADirectoryError(f"{colorama.Fore.RED}No such directory:'system' in this directory.{colorama.Fore.RESET}")
+        raise NotADirectoryError(f"{colorama.Fore.RED}No such directory:'system' in this directory.{colorama.Fore.RESET}")
     if not os.path.isfile(os.path.join(now_path, 'system', 'main.py')):
         print(f"{colorama.Fore.RED}No such file:'main.py' in'system' directory.{colorama.Fore.RESET}")
         print(f"{colorama.Fore.CYAN}Maybe QOS on your system has been broken.{colorama.Fore.RESET}")
@@ -116,7 +110,15 @@ if __name__ == "__main__":
         input("(Press any key to exit)")
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Exiting QOS.")
-        sys.exit(0)
+        sys.exit(1)
     except (FileNotFoundError, NotADirectoryError, ImportError, Exception) as e:
         print(f"Error: {e}")
         sys.exit(0)
+
+"""
+# 20250802
+孩子们，Leaf Boot Manager已完成基本开发，并将在近期完全用于QOS，作为QOS的引导程序。
+相信孩子们以及看出来了，为什么规定了像“11”、“12”、“16”、“19”这样的错误码？
+其实这就是Leaf Boot Manager的标准接收返回值，没错，其实我们已经为迁移到Leaf Boot Manager做好了准备。
+Leaf Boot Manager的更多高级功能将持续开发，也会提供更多的配套工具，敬请期待。。。
+"""

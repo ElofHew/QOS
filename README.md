@@ -2,7 +2,7 @@
 
 # Quarter OS
 
-![QuarterOS Logo](img/logo_b.png)
+![QuarterOS Logo](https://os.drevan.xyz/icon/qos_512.ico)
 
 A Professional **Fake-OS** Powered by Python 3
 
