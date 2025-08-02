@@ -27,11 +27,17 @@ Quarter OS 是一款基于 Python 3 的伪操作系统，简称 **QOS**，由 [E
 
 ## 一、配置Quarter OS
 
-详见 [Quarter OS 快速使用指南](docs/UserHelper/Quick_Use.md)
+详见 [Quarter OS 快速使用指南](https://github.com/ElofHew/QOS/wiki/Quick_Use)
+
+>[!TIP]
+>更多文档请查询： [Quarter OS Wiki](https://github.com/ElofHew/QOS/wiki) 或 [Quarter OS 帮助文档 - Oak Studio 官方网站] 。
 
 ## 二、简单方法
 
 安装好Python 3.10及以上版本后，**可以直接在常规命令行中运行** `run.py` （Windows使用PowerShell，Linux/macOS使用自带的终端）
+
+>[!WARNING]
+> 这将最终被[Leaf Boot Manager](https://github.com/ElofHew/LBM)取代
 
 ## 三、补充说明
 
@@ -39,7 +45,7 @@ Quarter OS 当前版本处于开发阶段（Alpha），功能不完善，如有b
 
 目前不接受任何Pull Request，因为当前版本属于基础框架搭建，不需要过多开发者参与。
 
-正式版预计于7月中上旬（7月15日前）发布，敬请期待。
+正式版原计划于7月15日发布正式版，但我还是高估了我的实力和时间，故正式版发布时间待定（应该不会拖太晚。。。）
 
 ------
 
