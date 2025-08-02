@@ -30,7 +30,7 @@ Quarter OS 是一款基于 Python 3 的伪操作系统，简称 **QOS**，由 [E
 详见 [Quarter OS 快速使用指南](https://github.com/ElofHew/QOS/wiki/Quick_Use)
 
 >[!TIP]
->更多文档请查询： [Quarter OS Wiki](https://github.com/ElofHew/QOS/wiki) 或 [Quarter OS 帮助文档 - Oak Studio 官方网站] 。
+>更多文档请查询： [Quarter OS Wiki](https://github.com/ElofHew/QOS/wiki) 或 [Quarter OS 帮助文档 - Oak Studio 官方网站](https://os.drevan.xyz/qos/docs) 。
 
 ## 二、简单方法
 
